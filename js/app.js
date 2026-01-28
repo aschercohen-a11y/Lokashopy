@@ -35,7 +35,7 @@ const App = {
     // Animations au scroll
     Utils.initScrollReveal();
 
-    console.log('BoothFinder initialized');
+    console.log('Lokashopy initialized');
   },
 
   // ----------------------------------------
@@ -217,7 +217,7 @@ const App = {
         <div class="container">
           <h2 class="section-title">Ce que disent nos clients</h2>
           <p class="section-subtitle">
-            Des milliers d'evenements reussis grace a BoothFinder
+            Des milliers d'evenements reussis grace a Lokashopy
           </p>
 
           <div class="testimonials-grid">
@@ -1489,7 +1489,7 @@ const App = {
         Components.showToast({
           type: 'success',
           title: 'Compte cree !',
-          message: 'Bienvenue sur BoothFinder. Vous allez recevoir un email de confirmation.'
+          message: 'Bienvenue sur Lokashopy. Vous allez recevoir un email de confirmation.'
         });
         // Redirect to home after a delay
         setTimeout(() => this.navigate('/'), 2000);

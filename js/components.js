@@ -1,5 +1,5 @@
 /* ========================================
-   BOOTHFINDER - Composants Reutilisables
+   LOKASHOPY - Composants Reutilisables
    ======================================== */
 
 const Components = {
@@ -61,7 +61,7 @@ const Components = {
         <div class="header-container">
           <a href="/" class="logo" data-nav="home">
             <span class="logo-icon">${this.icons.camera}</span>
-            Booth<span>Finder</span>
+            Loka<span>shopy</span>
           </a>
 
           <nav class="nav-desktop">
@@ -86,7 +86,7 @@ const Components = {
         <div class="mobile-nav-header">
           <a href="/" class="logo" data-nav="home">
             <span class="logo-icon">${this.icons.camera}</span>
-            Booth<span>Finder</span>
+            Loka<span>shopy</span>
           </a>
           <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Fermer">
             ${this.icons.x}
@@ -133,7 +133,7 @@ const Components = {
             <div class="footer-brand">
               <a href="/" class="logo" data-nav="home">
                 <span class="logo-icon">${this.icons.camera}</span>
-                Booth<span>Finder</span>
+                Loka<span>shopy</span>
               </a>
               <p>La premiere plateforme francaise pour trouver le photobooth ideal pour tous vos evenements.</p>
               <div class="footer-social">
@@ -172,7 +172,7 @@ const Components = {
           </div>
 
           <div class="footer-bottom">
-            <p class="footer-copyright">&copy; 2024 BoothFinder. Tous droits reserves.</p>
+            <p class="footer-copyright">&copy; 2024 Lokashopy. Tous droits reserves.</p>
             <div class="footer-legal">
               <a href="#">Mentions legales</a>
               <a href="#">CGU</a>

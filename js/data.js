@@ -1166,7 +1166,7 @@ const FAQ_PROVIDER = [
   },
   {
     question: 'Quels sont les frais de commission ?',
-    answer: 'BoothFinder ne prend aucune commission sur vos prestations. Vous payez uniquement l\'abonnement mensuel correspondant a votre offre. Tous les paiements de vos clients vous reviennent directement.'
+    answer: 'Lokashopy ne prend aucune commission sur vos prestations. Vous payez uniquement l\'abonnement mensuel correspondant a votre offre. Tous les paiements de vos clients vous reviennent directement.'
   },
   {
     question: 'Puis-je modifier mon offre en cours de route ?',
@@ -1193,7 +1193,7 @@ const TESTIMONIALS = [
     author: 'Camille & Thomas',
     avatar: 'https://placehold.co/t1/100/100',
     rating: 5,
-    text: 'Grace a BoothFinder, nous avons trouve le prestataire parfait pour notre mariage en moins d\'une heure ! Le photobooth miroir a fait un carton aupres de nos invites.',
+    text: 'Grace a Lokashopy, nous avons trouve le prestataire parfait pour notre mariage en moins d\'une heure ! Le photobooth miroir a fait un carton aupres de nos invites.',
     eventType: 'Mariage'
   },
   {
@@ -1209,7 +1209,7 @@ const TESTIMONIALS = [
     author: 'Lucas M.',
     avatar: 'https://placehold.co/t3/100/100',
     rating: 5,
-    text: 'Le 360 booth pour l\'anniversaire de ma femme etait genial ! Tous les invites en parlent encore. Merci BoothFinder !',
+    text: 'Le 360 booth pour l\'anniversaire de ma femme etait genial ! Tous les invites en parlent encore. Merci Lokashopy !',
     eventType: 'Anniversaire'
   }
 ];
@@ -1221,7 +1221,7 @@ const PROVIDER_TESTIMONIALS = [
     author: 'Jean-Marc',
     company: 'Flash Party',
     avatar: 'https://placehold.co/pt1/100/100',
-    quote: 'Depuis notre inscription sur BoothFinder, nous avons double notre nombre de demandes. La plateforme nous amene des clients qualifies qui savent ce qu\'ils veulent.'
+    quote: 'Depuis notre inscription sur Lokashopy, nous avons double notre nombre de demandes. La plateforme nous amene des clients qualifies qui savent ce qu\'ils veulent.'
   },
   {
     id: 2,
