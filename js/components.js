@@ -55,7 +55,32 @@ const Components = {
   // ----------------------------------------
   // HEADER
   // ----------------------------------------
-  renderHeader() {
+  renderHeader(isAuthenticated = false, user = null, providerData = null) {
+    const authSection = isAuthenticated
+      ? this.renderUserMenu(user, providerData)
+      : `
+        <div class="nav-actions" id="nav-actions">
+          <button class="btn btn-ghost btn-sm" id="login-btn">Connexion</button>
+          <button class="btn btn-primary btn-sm" id="signup-btn">Inscription</button>
+        </div>
+      `;
+
+    const mobileAuthSection = isAuthenticated
+      ? `
+        <div class="mobile-nav-user">
+          <a href="/dashboard" class="btn btn-primary" data-nav="dashboard">
+            ${this.icons.grid} Tableau de bord
+          </a>
+          <button class="btn btn-outline" id="mobile-logout-btn">Deconnexion</button>
+        </div>
+      `
+      : `
+        <div class="mobile-nav-actions">
+          <button class="btn btn-outline" id="mobile-login-btn">Connexion</button>
+          <button class="btn btn-primary" id="mobile-signup-btn">Inscription</button>
+        </div>
+      `;
+
     return `
       <header class="header" id="header">
         <div class="header-container">
@@ -68,12 +93,12 @@ const Components = {
             <ul class="nav-links">
               <li><a href="/" class="nav-link" data-nav="home">Accueil</a></li>
               <li><a href="/recherche" class="nav-link" data-nav="search">Rechercher</a></li>
-              <li><a href="/inscription-prestataire" class="nav-link" data-nav="register">Devenir prestataire</a></li>
+              ${isAuthenticated
+                ? `<li><a href="/dashboard" class="nav-link" data-nav="dashboard">Tableau de bord</a></li>`
+                : `<li><a href="/inscription-prestataire" class="nav-link" data-nav="register">Devenir prestataire</a></li>`
+              }
             </ul>
-            <div class="nav-actions">
-              <button class="btn btn-ghost btn-sm">Connexion</button>
-              <button class="btn btn-primary btn-sm">Inscription</button>
-            </div>
+            ${authSection}
           </nav>
 
           <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
@@ -106,18 +131,27 @@ const Components = {
                 <span>Rechercher</span>
               </a>
             </li>
-            <li>
-              <a href="/inscription-prestataire" class="mobile-nav-link" data-nav="register">
-                ${this.icons.users}
-                <span>Devenir prestataire</span>
-              </a>
-            </li>
+            ${isAuthenticated
+              ? `
+                <li>
+                  <a href="/dashboard" class="mobile-nav-link" data-nav="dashboard">
+                    ${this.icons.grid}
+                    <span>Tableau de bord</span>
+                  </a>
+                </li>
+              `
+              : `
+                <li>
+                  <a href="/inscription-prestataire" class="mobile-nav-link" data-nav="register">
+                    ${this.icons.users}
+                    <span>Devenir prestataire</span>
+                  </a>
+                </li>
+              `
+            }
           </ul>
         </div>
-        <div class="mobile-nav-actions">
-          <button class="btn btn-outline">Connexion</button>
-          <button class="btn btn-primary">Inscription</button>
-        </div>
+        ${mobileAuthSection}
       </nav>
     `;
   },
@@ -743,6 +777,687 @@ const Components = {
 
   renderSkeletonGrid(count = 6) {
     return Array(count).fill(this.renderProviderCardSkeleton()).join('');
+  },
+
+  // ----------------------------------------
+  // AUTH MODALS
+  // ----------------------------------------
+  renderLoginModal() {
+    const content = `
+      <form id="login-form" class="auth-form">
+        <div class="form-group">
+          <label class="form-label required">Email</label>
+          <input type="email" class="form-input" name="email" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Mot de passe</label>
+          <input type="password" class="form-input" name="password" required autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <button type="button" class="btn-link" id="forgot-password-btn">Mot de passe oublie ?</button>
+        </div>
+        <div class="auth-error" id="login-error" style="display: none;"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn">
+          Se connecter
+        </button>
+      </form>
+      <div class="auth-footer">
+        <p>Pas encore de compte ? <button type="button" class="btn-link" id="switch-to-register">Creer un compte</button></p>
+      </div>
+    `;
+
+    return this.renderModal({
+      id: 'login-modal',
+      title: 'Connexion',
+      content,
+      size: 'sm'
+    });
+  },
+
+  renderRegisterModal() {
+    const content = `
+      <form id="register-form" class="auth-form">
+        <div class="auth-type-selection" id="auth-type-selection">
+          <p class="auth-type-label">Vous etes :</p>
+          <div class="auth-type-options">
+            <label class="auth-type-option">
+              <input type="radio" name="userType" value="client" checked>
+              <span class="auth-type-card">
+                ${this.icons.user}
+                <strong>Client</strong>
+                <small>Je cherche un photobooth</small>
+              </span>
+            </label>
+            <label class="auth-type-option">
+              <input type="radio" name="userType" value="provider">
+              <span class="auth-type-card">
+                ${this.icons.camera}
+                <strong>Prestataire</strong>
+                <small>Je loue des photobooths</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Email</label>
+          <input type="email" class="form-input" name="email" required autocomplete="email">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label required">Mot de passe</label>
+            <input type="password" class="form-input" name="password" required minlength="6" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Confirmer</label>
+            <input type="password" class="form-input" name="passwordConfirm" required autocomplete="new-password">
+          </div>
+        </div>
+
+        <div class="provider-fields" id="provider-fields" style="display: none;">
+          <div class="form-group">
+            <label class="form-label required">Nom de l'entreprise</label>
+            <input type="text" class="form-input" name="companyName">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">Telephone</label>
+              <input type="tel" class="form-input" name="phone">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Ville</label>
+              <input type="text" class="form-input" name="city">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" name="terms" required>
+            <span>J'accepte les <a href="#" target="_blank">conditions d'utilisation</a></span>
+          </label>
+        </div>
+
+        <div class="auth-error" id="register-error" style="display: none;"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="register-submit-btn">
+          Creer mon compte
+        </button>
+      </form>
+      <div class="auth-footer">
+        <p>Deja un compte ? <button type="button" class="btn-link" id="switch-to-login">Se connecter</button></p>
+      </div>
+    `;
+
+    return this.renderModal({
+      id: 'register-modal',
+      title: 'Creer un compte',
+      content,
+      size: 'md'
+    });
+  },
+
+  renderForgotPasswordModal() {
+    const content = `
+      <form id="forgot-password-form" class="auth-form">
+        <p class="auth-description">Entrez votre email pour recevoir un lien de reinitialisation.</p>
+        <div class="form-group">
+          <label class="form-label required">Email</label>
+          <input type="email" class="form-input" name="email" required autocomplete="email">
+        </div>
+        <div class="auth-error" id="forgot-error" style="display: none;"></div>
+        <div class="auth-success" id="forgot-success" style="display: none;"></div>
+        <button type="submit" class="btn btn-primary btn-block">
+          Envoyer le lien
+        </button>
+      </form>
+      <div class="auth-footer">
+        <button type="button" class="btn-link" id="back-to-login">Retour a la connexion</button>
+      </div>
+    `;
+
+    return this.renderModal({
+      id: 'forgot-password-modal',
+      title: 'Mot de passe oublie',
+      content,
+      size: 'sm'
+    });
+  },
+
+  // ----------------------------------------
+  // USER MENU (HEADER)
+  // ----------------------------------------
+  renderUserMenu(user, providerData) {
+    const name = providerData?.profile?.name || user?.email?.split('@')[0] || 'Utilisateur';
+    const logo = providerData?.profile?.logo || '';
+    const initial = name.charAt(0).toUpperCase();
+
+    return `
+      <div class="user-menu" id="user-menu">
+        <button class="user-menu-btn" id="user-menu-btn">
+          <div class="user-avatar">
+            ${logo ? `<img src="${logo}" alt="${name}">` : `<span>${initial}</span>`}
+          </div>
+          <span class="user-name">${name}</span>
+          ${this.icons.chevronDown}
+        </button>
+        <div class="user-dropdown" id="user-dropdown">
+          <a href="/dashboard" class="user-dropdown-item" data-nav="dashboard">
+            ${this.icons.grid}
+            Tableau de bord
+          </a>
+          <a href="/dashboard/profil" class="user-dropdown-item" data-nav="dashboard">
+            ${this.icons.user}
+            Mon profil
+          </a>
+          <a href="/dashboard/equipements" class="user-dropdown-item" data-nav="dashboard">
+            ${this.icons.camera}
+            Mes photobooths
+          </a>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item" id="logout-btn">
+            ${this.icons.x}
+            Deconnexion
+          </button>
+        </div>
+      </div>
+    `;
+  },
+
+  // ----------------------------------------
+  // DASHBOARD COMPONENTS
+  // ----------------------------------------
+  renderDashboardLayout(content, activeTab = 'overview') {
+    const tabs = [
+      { id: 'overview', label: 'Vue d\'ensemble', icon: this.icons.grid },
+      { id: 'profil', label: 'Profil', icon: this.icons.user },
+      { id: 'equipements', label: 'Equipements', icon: this.icons.camera },
+      { id: 'tarifs', label: 'Tarifs', icon: this.icons.barChart },
+      { id: 'galerie', label: 'Galerie', icon: this.icons.image },
+      { id: 'avis', label: 'Avis', icon: this.icons.star }
+    ];
+
+    return `
+      <div class="dashboard-page">
+        <div class="dashboard-container">
+          <!-- Mobile navigation -->
+          <nav class="dashboard-mobile-nav">
+            ${tabs.map(tab => `
+              <a href="/dashboard${tab.id === 'overview' ? '' : '/' + tab.id}"
+                 class="dashboard-mobile-nav-item ${activeTab === tab.id ? 'active' : ''}"
+                 data-nav="dashboard"
+                 data-tab="${tab.id}">
+                ${tab.icon}
+                <span>${tab.label}</span>
+              </a>
+            `).join('')}
+          </nav>
+
+          <aside class="dashboard-sidebar">
+            <nav class="dashboard-nav">
+              ${tabs.map(tab => `
+                <a href="/dashboard${tab.id === 'overview' ? '' : '/' + tab.id}"
+                   class="dashboard-nav-item ${activeTab === tab.id ? 'active' : ''}"
+                   data-nav="dashboard"
+                   data-tab="${tab.id}">
+                  ${tab.icon}
+                  <span>${tab.label}</span>
+                </a>
+              `).join('')}
+            </nav>
+          </aside>
+          <main class="dashboard-main">
+            ${content}
+          </main>
+        </div>
+      </div>
+    `;
+  },
+
+  renderDashboardOverview(providerData) {
+    const stats = providerData?.stats || { views: 0, quotes: 0, favorites: 0 };
+    const profile = providerData?.profile || {};
+    const booths = providerData?.booths || [];
+
+    return `
+      <div class="dashboard-header">
+        <h1>Bienvenue, ${profile.name || 'Prestataire'}</h1>
+        <p>Gerez votre profil et vos prestations</p>
+      </div>
+
+      <div class="dashboard-stats">
+        <div class="stat-card">
+          <div class="stat-icon">${this.icons.eye}</div>
+          <div class="stat-content">
+            <div class="stat-value">${stats.views}</div>
+            <div class="stat-label">Vues du profil</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">${this.icons.send}</div>
+          <div class="stat-content">
+            <div class="stat-value">${stats.quotes}</div>
+            <div class="stat-label">Demandes de devis</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">${this.icons.heart}</div>
+          <div class="stat-content">
+            <div class="stat-value">${stats.favorites}</div>
+            <div class="stat-label">Favoris</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">${this.icons.camera}</div>
+          <div class="stat-content">
+            <div class="stat-value">${booths.length}</div>
+            <div class="stat-label">Photobooths</div>
+          </div>
+        </div>
+      </div>
+
+      ${!profile.verified ? `
+        <div class="dashboard-alert alert-info">
+          ${this.icons.info}
+          <div>
+            <strong>Completez votre profil</strong>
+            <p>Ajoutez vos informations et photos pour etre visible sur la plateforme.</p>
+          </div>
+          <a href="/dashboard/profil" class="btn btn-primary btn-sm" data-nav="dashboard">Completer</a>
+        </div>
+      ` : ''}
+
+      <div class="dashboard-section">
+        <h2>Actions rapides</h2>
+        <div class="quick-actions">
+          <a href="/dashboard/equipements" class="quick-action-card" data-nav="dashboard">
+            ${this.icons.camera}
+            <span>Ajouter un photobooth</span>
+          </a>
+          <a href="/dashboard/galerie" class="quick-action-card" data-nav="dashboard">
+            ${this.icons.upload}
+            <span>Ajouter des photos</span>
+          </a>
+          <a href="/dashboard/tarifs" class="quick-action-card" data-nav="dashboard">
+            ${this.icons.barChart}
+            <span>Gerer les tarifs</span>
+          </a>
+          ${profile.slug ? `
+            <a href="/prestataire/${profile.slug}" class="quick-action-card" data-nav="provider" data-slug="${profile.slug}">
+              ${this.icons.eye}
+              <span>Voir mon profil public</span>
+            </a>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  },
+
+  renderDashboardProfile(providerData) {
+    const profile = providerData?.profile || {};
+    const location = providerData?.location || {};
+    const contact = providerData?.contact || {};
+
+    return `
+      <div class="dashboard-header">
+        <h1>Mon profil</h1>
+        <p>Informations visibles par les clients</p>
+      </div>
+
+      <form id="profile-form" class="dashboard-form">
+        <div class="form-section">
+          <h3>Informations de l'entreprise</h3>
+
+          <div class="form-group">
+            <label class="form-label">Logo</label>
+            <div class="logo-upload-container">
+              <div class="logo-preview" id="logo-preview">
+                ${profile.logo
+                  ? `<img src="${profile.logo}" alt="Logo">`
+                  : `<span>${this.icons.camera}</span>`
+                }
+              </div>
+              <div class="logo-upload-actions">
+                <input type="file" id="logo-input" accept="image/*" hidden>
+                <button type="button" class="btn btn-outline btn-sm" id="change-logo-btn">
+                  ${this.icons.upload} Changer le logo
+                </button>
+                <p class="form-hint">JPG ou PNG, max 2MB</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label required">Nom de l'entreprise</label>
+            <input type="text" class="form-input" name="name" value="${profile.name || ''}" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label required">Description</label>
+            <textarea class="form-input form-textarea" name="description" rows="5" required placeholder="Presentez votre entreprise, vos services...">${profile.description || ''}</textarea>
+            <p class="form-hint">Minimum 100 caracteres pour un meilleur referencement</p>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Localisation</h3>
+
+          <div class="form-group">
+            <label class="form-label required">Adresse</label>
+            <input type="text" class="form-input" name="address" value="${location.address || ''}">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">Code postal</label>
+              <input type="text" class="form-input" name="postalCode" value="${location.postalCode || ''}" pattern="[0-9]{5}">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Ville</label>
+              <input type="text" class="form-input" name="city" value="${location.city || ''}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Departement</label>
+            <input type="text" class="form-input" name="department" value="${location.department || ''}">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Contact</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">Telephone</label>
+              <input type="tel" class="form-input" name="phone" value="${contact.phone || ''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Site web</label>
+              <input type="url" class="form-input" name="website" value="${contact.website || ''}" placeholder="https://">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Instagram</label>
+              <input type="text" class="form-input" name="instagram" value="${contact.social?.instagram || ''}" placeholder="@votrecompte">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Facebook</label>
+              <input type="text" class="form-input" name="facebook" value="${contact.social?.facebook || ''}" placeholder="VotrePage">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions-sticky">
+          <button type="submit" class="btn btn-primary" id="save-profile-btn">
+            ${this.icons.check} Enregistrer les modifications
+          </button>
+        </div>
+      </form>
+    `;
+  },
+
+  renderDashboardEquipments(providerData) {
+    const booths = providerData?.booths || [];
+
+    return `
+      <div class="dashboard-header">
+        <h1>Mes equipements</h1>
+        <button class="btn btn-primary" id="add-booth-btn">
+          ${this.icons.camera} Ajouter un photobooth
+        </button>
+      </div>
+
+      ${booths.length === 0 ? `
+        <div class="empty-state">
+          <div class="empty-state-icon">${this.icons.camera}</div>
+          <h3>Aucun equipement</h3>
+          <p>Ajoutez vos premiers photobooths pour commencer a recevoir des demandes.</p>
+          <button class="btn btn-primary" id="add-first-booth-btn">
+            ${this.icons.camera} Ajouter mon premier photobooth
+          </button>
+        </div>
+      ` : `
+        <div class="booths-list">
+          ${booths.map(booth => `
+            <div class="booth-card" data-booth-id="${booth.id}">
+              <div class="booth-card-image">
+                ${booth.images && booth.images[0]
+                  ? `<img src="${booth.images[0]}" alt="${booth.name}">`
+                  : `<div class="booth-card-placeholder">${this.icons.camera}</div>`
+                }
+              </div>
+              <div class="booth-card-content">
+                <h3>${booth.name || 'Sans nom'}</h3>
+                <p class="booth-card-type">
+                  <span class="tag">${DATA.BOOTH_TYPES.find(t => t.id === booth.type)?.name || booth.type || 'Non defini'}</span>
+                </p>
+                <p class="booth-card-price">
+                  A partir de <strong>${booth.priceFrom ? Utils.formatPrice(booth.priceFrom) : '-'}</strong>
+                </p>
+              </div>
+              <div class="booth-card-actions">
+                <button class="btn btn-ghost btn-sm edit-booth-btn" data-booth-id="${booth.id}">
+                  ${this.icons.sliders} Modifier
+                </button>
+                <button class="btn btn-ghost btn-sm delete-booth-btn" data-booth-id="${booth.id}">
+                  ${this.icons.x} Supprimer
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `}
+
+      ${this.renderBoothModal()}
+    `;
+  },
+
+  renderBoothModal(booth = null) {
+    const isEdit = booth !== null;
+    const content = `
+      <form id="booth-form" class="booth-form">
+        <div class="form-group">
+          <label class="form-label required">Nom du photobooth</label>
+          <input type="text" class="form-input" name="name" value="${booth?.name || ''}" required placeholder="Ex: Miroir Magique Premium">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label required">Type</label>
+            <select class="form-input form-select" name="type" required>
+              <option value="">Selectionnez...</option>
+              ${DATA.BOOTH_TYPES.map(type => `
+                <option value="${type.id}" ${booth?.type === type.id ? 'selected' : ''}>${type.name}</option>
+              `).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Prix a partir de</label>
+            <input type="number" class="form-input" name="priceFrom" value="${booth?.priceFrom || ''}" required min="0" placeholder="300">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input form-textarea" name="description" rows="3" placeholder="Decrivez ce photobooth...">${booth?.description || ''}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Caracteristiques</label>
+          <textarea class="form-input form-textarea" name="specs" rows="2" placeholder="Une caracteristique par ligne">${booth?.specs?.join('\n') || ''}</textarea>
+          <p class="form-hint">Une caracteristique par ligne (ex: Ecran tactile 21 pouces)</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Options incluses</label>
+          <div class="checkbox-group">
+            ${DATA.OPTIONS.map(option => `
+              <label class="form-checkbox">
+                <input type="checkbox" name="options" value="${option.id}" ${booth?.options?.includes(option.id) ? 'checked' : ''}>
+                <span>${option.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+
+        <input type="hidden" name="boothId" value="${booth?.id || ''}">
+      </form>
+    `;
+
+    const footer = `
+      <button class="btn btn-ghost" data-close-modal="booth-modal">Annuler</button>
+      <button class="btn btn-primary" id="save-booth-btn">
+        ${isEdit ? 'Modifier' : 'Ajouter'} le photobooth
+      </button>
+    `;
+
+    return this.renderModal({
+      id: 'booth-modal',
+      title: isEdit ? 'Modifier le photobooth' : 'Ajouter un photobooth',
+      content,
+      footer,
+      size: 'lg'
+    });
+  },
+
+  renderDashboardPricing(providerData) {
+    const pricing = providerData?.pricing || { formulas: [], extras: [] };
+
+    return `
+      <div class="dashboard-header">
+        <h1>Mes tarifs</h1>
+        <p>Definissez vos formules et options</p>
+      </div>
+
+      <form id="pricing-form" class="dashboard-form">
+        <div class="form-section">
+          <div class="form-section-header">
+            <h3>Formules</h3>
+            <button type="button" class="btn btn-outline btn-sm" id="add-formula-btn">
+              ${this.icons.check} Ajouter une formule
+            </button>
+          </div>
+
+          <div id="formulas-list">
+            ${pricing.formulas.length === 0 ? `
+              <div class="empty-inline">Aucune formule definie</div>
+            ` : pricing.formulas.map((formula, index) => `
+              <div class="pricing-formula-card" data-index="${index}">
+                <div class="pricing-formula-header">
+                  <input type="text" class="form-input" name="formula_name_${index}" value="${formula.name}" placeholder="Nom de la formule">
+                  <input type="number" class="form-input" name="formula_price_${index}" value="${formula.price}" placeholder="Prix" style="width: 120px;">
+                  <button type="button" class="btn btn-ghost btn-sm remove-formula-btn" data-index="${index}">
+                    ${this.icons.x}
+                  </button>
+                </div>
+                <textarea class="form-input" name="formula_features_${index}" rows="2" placeholder="Caracteristiques (une par ligne)">${formula.features?.join('\n') || ''}</textarea>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-header">
+            <h3>Options supplementaires</h3>
+            <button type="button" class="btn btn-outline btn-sm" id="add-extra-btn">
+              ${this.icons.check} Ajouter une option
+            </button>
+          </div>
+
+          <div id="extras-list">
+            ${pricing.extras.length === 0 ? `
+              <div class="empty-inline">Aucune option definie</div>
+            ` : pricing.extras.map((extra, index) => `
+              <div class="pricing-extra-row" data-index="${index}">
+                <input type="text" class="form-input" name="extra_name_${index}" value="${extra.name}" placeholder="Nom de l'option">
+                <input type="number" class="form-input" name="extra_price_${index}" value="${extra.price}" placeholder="Prix" style="width: 100px;">
+                <input type="text" class="form-input" name="extra_unit_${index}" value="${extra.unit || ''}" placeholder="/h, /pers..." style="width: 80px;">
+                <button type="button" class="btn btn-ghost btn-sm remove-extra-btn" data-index="${index}">
+                  ${this.icons.x}
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="form-actions-sticky">
+          <button type="submit" class="btn btn-primary" id="save-pricing-btn">
+            ${this.icons.check} Enregistrer les tarifs
+          </button>
+        </div>
+      </form>
+    `;
+  },
+
+  renderDashboardGallery(providerData) {
+    const gallery = providerData?.gallery || [];
+
+    return `
+      <div class="dashboard-header">
+        <h1>Ma galerie</h1>
+        <button class="btn btn-primary" id="upload-photos-btn">
+          ${this.icons.upload} Ajouter des photos
+        </button>
+      </div>
+
+      <input type="file" id="gallery-input" accept="image/*" multiple hidden>
+
+      ${gallery.length === 0 ? `
+        <div class="empty-state">
+          <div class="empty-state-icon">${this.icons.image}</div>
+          <h3>Aucune photo</h3>
+          <p>Ajoutez des photos de vos prestations pour attirer plus de clients.</p>
+          <button class="btn btn-primary" id="upload-first-photos-btn">
+            ${this.icons.upload} Ajouter mes premieres photos
+          </button>
+        </div>
+      ` : `
+        <div class="gallery-grid" id="gallery-grid">
+          ${gallery.map((url, index) => `
+            <div class="gallery-item-edit" data-index="${index}">
+              <img src="${url}" alt="Photo ${index + 1}">
+              <button class="gallery-item-delete" data-url="${url}">
+                ${this.icons.x}
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      `}
+
+      <div class="upload-progress" id="upload-progress" style="display: none;">
+        <div class="upload-progress-bar">
+          <div class="upload-progress-fill" id="upload-progress-fill"></div>
+        </div>
+        <p id="upload-progress-text">Telechargement en cours...</p>
+      </div>
+    `;
+  },
+
+  renderDashboardReviews(providerData) {
+    // Pour l'instant, les avis sont en lecture seule
+    // Dans une vraie implementation, on chargerait les avis depuis Firestore
+    return `
+      <div class="dashboard-header">
+        <h1>Mes avis</h1>
+        <p>Les avis laisses par vos clients</p>
+      </div>
+
+      <div class="reviews-stats-dashboard">
+        <div class="reviews-average-large">
+          <span class="reviews-average-value">-</span>
+          <div class="reviews-average-stars">${this.icons.star}${this.icons.star}${this.icons.star}${this.icons.star}${this.icons.star}</div>
+          <span class="reviews-average-count">0 avis</span>
+        </div>
+      </div>
+
+      <div class="empty-state">
+        <div class="empty-state-icon">${this.icons.star}</div>
+        <h3>Aucun avis pour le moment</h3>
+        <p>Les avis apparaitront ici apres vos premieres prestations.</p>
+      </div>
+    `;
   }
 };
 

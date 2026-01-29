@@ -10,13 +10,25 @@ const App = {
     currentProvider: null,
     registrationStep: 0,
     lightboxImages: [],
-    lightboxIndex: 0
+    lightboxIndex: 0,
+    // Auth state
+    currentUser: null,
+    userProvider: null,
+    isAuthenticated: false,
+    authInitialized: false,
+    dashboardTab: 'overview'
   },
 
   // ----------------------------------------
   // INITIALISATION
   // ----------------------------------------
   init() {
+    // Initialiser Supabase
+    if (typeof initializeSupabase === 'function') {
+      initializeSupabase();
+      this.setupAuthListener();
+    }
+
     // Rendu initial du layout
     this.renderLayout();
 
@@ -39,16 +51,293 @@ const App = {
   },
 
   // ----------------------------------------
+  // AUTHENTIFICATION
+  // ----------------------------------------
+  setupAuthListener() {
+    if (typeof AuthService !== 'undefined') {
+      AuthService.onAuthStateChanged(async (user) => {
+        this.state.currentUser = user;
+        this.state.isAuthenticated = !!user;
+
+        if (user) {
+          // Charger les donnees du prestataire
+          const result = await ProviderService.getProvider(user.id);
+          if (result.success) {
+            this.state.userProvider = result.data;
+          }
+        } else {
+          this.state.userProvider = null;
+        }
+
+        this.state.authInitialized = true;
+
+        // Mettre a jour le header
+        this.updateHeader();
+
+        // Si on est sur le dashboard sans etre connecte, rediriger
+        if (!user && this.state.currentPage === 'dashboard') {
+          this.navigate('/');
+          this.openModal('login-modal');
+        }
+      });
+    }
+  },
+
+  updateHeader() {
+    const headerContainer = document.querySelector('.header-container');
+    if (headerContainer) {
+      const app = document.getElementById('app');
+      const mainContent = document.getElementById('main-content').innerHTML;
+
+      // Re-render le layout avec le bon etat d'auth
+      this.renderLayout();
+
+      // Restaurer le contenu
+      document.getElementById('main-content').innerHTML = mainContent;
+
+      // Re-setup les listeners du header
+      this.setupHeaderListeners();
+    }
+  },
+
+  setupHeaderListeners() {
+    // Boutons de connexion/inscription
+    document.getElementById('login-btn')?.addEventListener('click', () => {
+      this.openModal('login-modal');
+    });
+
+    document.getElementById('signup-btn')?.addEventListener('click', () => {
+      this.openModal('register-modal');
+    });
+
+    document.getElementById('mobile-login-btn')?.addEventListener('click', () => {
+      this.closeMobileMenu();
+      this.openModal('login-modal');
+    });
+
+    document.getElementById('mobile-signup-btn')?.addEventListener('click', () => {
+      this.closeMobileMenu();
+      this.openModal('register-modal');
+    });
+
+    // User menu dropdown
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+    if (userMenuBtn && userDropdown) {
+      userMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userDropdown.classList.toggle('open');
+      });
+
+      document.addEventListener('click', () => {
+        userDropdown.classList.remove('open');
+      });
+    }
+
+    // Logout buttons
+    document.getElementById('logout-btn')?.addEventListener('click', () => this.handleLogout());
+    document.getElementById('mobile-logout-btn')?.addEventListener('click', () => {
+      this.closeMobileMenu();
+      this.handleLogout();
+    });
+
+    // Mobile menu
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+      document.getElementById('mobile-nav').classList.add('open');
+      document.body.classList.add('no-scroll');
+    });
+
+    document.getElementById('mobile-nav-close')?.addEventListener('click', () => {
+      this.closeMobileMenu();
+    });
+  },
+
+  async handleLogin(email, password) {
+    const result = await AuthService.login(email, password);
+    if (result.success) {
+      this.closeModal('login-modal');
+      Components.showToast({
+        type: 'success',
+        title: 'Connexion reussie',
+        message: 'Bienvenue sur Lokashopy !'
+      });
+      // Rediriger vers le dashboard si c'est un prestataire
+      setTimeout(() => this.navigate('/dashboard'), 500);
+    } else {
+      const errorEl = document.getElementById('login-error');
+      if (errorEl) {
+        errorEl.textContent = result.error;
+        errorEl.style.display = 'block';
+      }
+    }
+    return result;
+  },
+
+  async handleRegister(formData) {
+    const result = await AuthService.register(formData.email, formData.password, formData);
+    if (result.success) {
+      this.closeModal('register-modal');
+      Components.showToast({
+        type: 'success',
+        title: 'Compte cree !',
+        message: 'Bienvenue sur Lokashopy ! Completez votre profil.'
+      });
+      setTimeout(() => this.navigate('/dashboard/profil'), 500);
+    } else {
+      const errorEl = document.getElementById('register-error');
+      if (errorEl) {
+        errorEl.textContent = result.error;
+        errorEl.style.display = 'block';
+      }
+    }
+    return result;
+  },
+
+  async handleLogout() {
+    const result = await AuthService.logout();
+    if (result.success) {
+      Components.showToast({
+        type: 'info',
+        message: 'Vous avez ete deconnecte'
+      });
+      this.navigate('/');
+    }
+  },
+
+  async handleForgotPassword(email) {
+    const result = await AuthService.resetPassword(email);
+    return result;
+  },
+
+  // ----------------------------------------
   // LAYOUT DE BASE
   // ----------------------------------------
   renderLayout() {
     const app = document.getElementById('app');
     app.innerHTML = `
-      ${Components.renderHeader()}
+      ${Components.renderHeader(this.state.isAuthenticated, this.state.currentUser, this.state.userProvider)}
       <main id="main-content"></main>
       ${Components.renderFooter()}
       ${Components.renderLightbox()}
+      ${Components.renderLoginModal()}
+      ${Components.renderRegisterModal()}
+      ${Components.renderForgotPasswordModal()}
     `;
+
+    // Setup header listeners apres le rendu
+    this.setupHeaderListeners();
+
+    // Setup auth forms
+    this.setupAuthForms();
+  },
+
+  setupAuthForms() {
+    // Login form
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(loginForm);
+        const submitBtn = document.getElementById('login-submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loader loader-sm"></span> Connexion...';
+
+        await this.handleLogin(formData.get('email'), formData.get('password'));
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Se connecter';
+      });
+    }
+
+    // Register form
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+      // Toggle provider fields
+      const userTypeInputs = registerForm.querySelectorAll('input[name="userType"]');
+      const providerFields = document.getElementById('provider-fields');
+
+      userTypeInputs.forEach(input => {
+        input.addEventListener('change', () => {
+          if (input.value === 'provider' && input.checked) {
+            providerFields.style.display = 'block';
+            providerFields.querySelectorAll('input').forEach(i => i.required = true);
+          } else if (input.value === 'client' && input.checked) {
+            providerFields.style.display = 'none';
+            providerFields.querySelectorAll('input').forEach(i => i.required = false);
+          }
+        });
+      });
+
+      registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(registerForm);
+
+        // Validation mot de passe
+        if (formData.get('password') !== formData.get('passwordConfirm')) {
+          const errorEl = document.getElementById('register-error');
+          errorEl.textContent = 'Les mots de passe ne correspondent pas';
+          errorEl.style.display = 'block';
+          return;
+        }
+
+        const submitBtn = document.getElementById('register-submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loader loader-sm"></span> Creation...';
+
+        await this.handleRegister({
+          email: formData.get('email'),
+          password: formData.get('password'),
+          userType: formData.get('userType'),
+          companyName: formData.get('companyName') || formData.get('email').split('@')[0],
+          phone: formData.get('phone'),
+          city: formData.get('city')
+        });
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Creer mon compte';
+      });
+    }
+
+    // Forgot password form
+    const forgotForm = document.getElementById('forgot-password-form');
+    if (forgotForm) {
+      forgotForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = forgotForm.querySelector('input[name="email"]').value;
+        const result = await this.handleForgotPassword(email);
+
+        if (result.success) {
+          document.getElementById('forgot-success').style.display = 'block';
+          document.getElementById('forgot-success').textContent = 'Email envoye ! Verifiez votre boite de reception.';
+          document.getElementById('forgot-error').style.display = 'none';
+        } else {
+          document.getElementById('forgot-error').style.display = 'block';
+          document.getElementById('forgot-error').textContent = result.error;
+          document.getElementById('forgot-success').style.display = 'none';
+        }
+      });
+    }
+
+    // Switch between modals
+    document.getElementById('switch-to-register')?.addEventListener('click', () => {
+      this.closeModal('login-modal');
+      this.openModal('register-modal');
+    });
+
+    document.getElementById('switch-to-login')?.addEventListener('click', () => {
+      this.closeModal('register-modal');
+      this.openModal('login-modal');
+    });
+
+    document.getElementById('forgot-password-btn')?.addEventListener('click', () => {
+      this.closeModal('login-modal');
+      this.openModal('forgot-password-modal');
+    });
+
+    document.getElementById('back-to-login')?.addEventListener('click', () => {
+      this.closeModal('forgot-password-modal');
+      this.openModal('login-modal');
+    });
   },
 
   // ----------------------------------------
@@ -108,6 +397,26 @@ const App = {
     } else if (pathname === '/inscription-prestataire') {
       this.renderRegistrationPage();
       this.state.currentPage = 'register';
+    } else if (pathname.startsWith('/dashboard')) {
+      // Routes du dashboard (protegees)
+      if (!this.state.isAuthenticated && this.state.authInitialized) {
+        this.navigate('/');
+        this.openModal('login-modal');
+        return;
+      }
+
+      const dashboardPath = pathname.replace('/dashboard', '').replace('/', '');
+      this.state.dashboardTab = dashboardPath || 'overview';
+      this.renderDashboardPage(this.state.dashboardTab);
+      this.state.currentPage = 'dashboard';
+    } else if (pathname === '/connexion') {
+      this.renderHomePage();
+      this.state.currentPage = 'home';
+      setTimeout(() => this.openModal('login-modal'), 100);
+    } else if (pathname === '/inscription') {
+      this.renderHomePage();
+      this.state.currentPage = 'home';
+      setTimeout(() => this.openModal('register-modal'), 100);
     } else {
       this.renderHomePage();
       this.state.currentPage = 'home';
@@ -1589,6 +1898,457 @@ const App = {
   },
 
   // ----------------------------------------
+  // PAGE DASHBOARD
+  // ----------------------------------------
+  renderDashboardPage(tab = 'overview') {
+    const main = document.getElementById('main-content');
+    const providerData = this.state.userProvider;
+
+    let content = '';
+    switch (tab) {
+      case 'profil':
+        content = Components.renderDashboardProfile(providerData);
+        break;
+      case 'equipements':
+        content = Components.renderDashboardEquipments(providerData);
+        break;
+      case 'tarifs':
+        content = Components.renderDashboardPricing(providerData);
+        break;
+      case 'galerie':
+        content = Components.renderDashboardGallery(providerData);
+        break;
+      case 'avis':
+        content = Components.renderDashboardReviews(providerData);
+        break;
+      default:
+        content = Components.renderDashboardOverview(providerData);
+    }
+
+    main.innerHTML = Components.renderDashboardLayout(content, tab);
+
+    // Setup des fonctionnalites du dashboard
+    this.initDashboardFeatures(tab);
+  },
+
+  initDashboardFeatures(tab) {
+    switch (tab) {
+      case 'profil':
+        this.initProfileFeatures();
+        break;
+      case 'equipements':
+        this.initEquipmentsFeatures();
+        break;
+      case 'tarifs':
+        this.initPricingFeatures();
+        break;
+      case 'galerie':
+        this.initGalleryFeatures();
+        break;
+    }
+  },
+
+  initProfileFeatures() {
+    const form = document.getElementById('profile-form');
+    if (!form) return;
+
+    // Logo upload
+    const logoInput = document.getElementById('logo-input');
+    const changeLogoBtn = document.getElementById('change-logo-btn');
+    const logoPreview = document.getElementById('logo-preview');
+
+    changeLogoBtn?.addEventListener('click', () => logoInput.click());
+
+    logoInput?.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        changeLogoBtn.innerHTML = '<span class="loader loader-sm"></span> Upload...';
+        changeLogoBtn.disabled = true;
+
+        const result = await StorageService.uploadLogo(this.state.currentUser.id, file);
+        if (result.success) {
+          logoPreview.innerHTML = `<img src="${result.url}" alt="Logo">`;
+          this.state.userProvider.profile.logo = result.url;
+          Components.showToast({ type: 'success', message: 'Logo mis a jour' });
+        } else {
+          Components.showToast({ type: 'error', message: 'Erreur lors de l\'upload' });
+        }
+
+        changeLogoBtn.innerHTML = `${Components.icons.upload} Changer le logo`;
+        changeLogoBtn.disabled = false;
+      }
+    });
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const submitBtn = document.getElementById('save-profile-btn');
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loader loader-sm"></span> Enregistrement...';
+
+      const uid = this.state.currentUser.id;
+
+      // Update profile
+      await ProviderService.updateProfile(uid, {
+        name: formData.get('name'),
+        description: formData.get('description')
+      });
+
+      // Update location
+      await ProviderService.updateLocation(uid, {
+        address: formData.get('address'),
+        postalCode: formData.get('postalCode'),
+        city: formData.get('city'),
+        department: formData.get('department')
+      });
+
+      // Update contact
+      await ProviderService.updateContact(uid, {
+        phone: formData.get('phone'),
+        website: formData.get('website'),
+        email: this.state.currentUser.email,
+        social: {
+          instagram: formData.get('instagram'),
+          facebook: formData.get('facebook')
+        }
+      });
+
+      // Refresh provider data
+      const result = await ProviderService.getProvider(uid);
+      if (result.success) {
+        this.state.userProvider = result.data;
+      }
+
+      Components.showToast({
+        type: 'success',
+        title: 'Profil mis a jour',
+        message: 'Vos modifications ont ete enregistrees.'
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `${Components.icons.check} Enregistrer les modifications`;
+    });
+  },
+
+  initEquipmentsFeatures() {
+    // Add booth buttons
+    const addBoothBtn = document.getElementById('add-booth-btn');
+    const addFirstBoothBtn = document.getElementById('add-first-booth-btn');
+
+    const openBoothModal = () => {
+      this.openModal('booth-modal');
+      this.setupBoothForm();
+    };
+
+    addBoothBtn?.addEventListener('click', openBoothModal);
+    addFirstBoothBtn?.addEventListener('click', openBoothModal);
+
+    // Edit booth buttons
+    document.querySelectorAll('.edit-booth-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const boothId = btn.dataset.boothId;
+        const booth = this.state.userProvider.booths.find(b => b.id === boothId);
+        if (booth) {
+          // Update modal content with booth data
+          const form = document.getElementById('booth-form');
+          if (form) {
+            form.querySelector('[name="name"]').value = booth.name || '';
+            form.querySelector('[name="type"]').value = booth.type || '';
+            form.querySelector('[name="priceFrom"]').value = booth.priceFrom || '';
+            form.querySelector('[name="description"]').value = booth.description || '';
+            form.querySelector('[name="specs"]').value = booth.specs?.join('\n') || '';
+            form.querySelector('[name="boothId"]').value = booth.id;
+
+            // Check options
+            form.querySelectorAll('[name="options"]').forEach(cb => {
+              cb.checked = booth.options?.includes(cb.value) || false;
+            });
+          }
+          this.openModal('booth-modal');
+          this.setupBoothForm();
+        }
+      });
+    });
+
+    // Delete booth buttons
+    document.querySelectorAll('.delete-booth-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const boothId = btn.dataset.boothId;
+        if (confirm('Voulez-vous vraiment supprimer ce photobooth ?')) {
+          const result = await ProviderService.deleteBooth(this.state.currentUser.id, boothId);
+          if (result.success) {
+            Components.showToast({ type: 'success', message: 'Photobooth supprime' });
+            // Refresh
+            const providerResult = await ProviderService.getProvider(this.state.currentUser.id);
+            if (providerResult.success) {
+              this.state.userProvider = providerResult.data;
+            }
+            this.renderDashboardPage('equipements');
+          }
+        }
+      });
+    });
+  },
+
+  setupBoothForm() {
+    const saveBtn = document.getElementById('save-booth-btn');
+    const form = document.getElementById('booth-form');
+
+    if (!saveBtn || !form) return;
+
+    // Remove old listener
+    const newSaveBtn = saveBtn.cloneNode(true);
+    saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+
+    newSaveBtn.addEventListener('click', async () => {
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const formData = new FormData(form);
+      const boothId = formData.get('boothId');
+
+      newSaveBtn.disabled = true;
+      newSaveBtn.innerHTML = '<span class="loader loader-sm"></span> Enregistrement...';
+
+      const boothData = {
+        name: formData.get('name'),
+        type: formData.get('type'),
+        priceFrom: parseInt(formData.get('priceFrom')),
+        description: formData.get('description'),
+        specs: formData.get('specs').split('\n').filter(s => s.trim()),
+        options: formData.getAll('options'),
+        images: []
+      };
+
+      let result;
+      if (boothId) {
+        result = await ProviderService.updateBooth(this.state.currentUser.id, boothId, boothData);
+      } else {
+        result = await ProviderService.addBooth(this.state.currentUser.id, boothData);
+      }
+
+      if (result.success) {
+        this.closeModal('booth-modal');
+        Components.showToast({
+          type: 'success',
+          message: boothId ? 'Photobooth modifie' : 'Photobooth ajoute'
+        });
+        // Refresh
+        const providerResult = await ProviderService.getProvider(this.state.currentUser.id);
+        if (providerResult.success) {
+          this.state.userProvider = providerResult.data;
+        }
+        this.renderDashboardPage('equipements');
+      } else {
+        Components.showToast({ type: 'error', message: 'Erreur lors de l\'enregistrement' });
+        newSaveBtn.disabled = false;
+        newSaveBtn.textContent = 'Enregistrer';
+      }
+    });
+  },
+
+  initPricingFeatures() {
+    const form = document.getElementById('pricing-form');
+    if (!form) return;
+
+    let formulaCount = this.state.userProvider?.pricing?.formulas?.length || 0;
+    let extraCount = this.state.userProvider?.pricing?.extras?.length || 0;
+
+    // Add formula
+    document.getElementById('add-formula-btn')?.addEventListener('click', () => {
+      const list = document.getElementById('formulas-list');
+      const emptyEl = list.querySelector('.empty-inline');
+      if (emptyEl) emptyEl.remove();
+
+      const div = document.createElement('div');
+      div.className = 'pricing-formula-card';
+      div.dataset.index = formulaCount;
+      div.innerHTML = `
+        <div class="pricing-formula-header">
+          <input type="text" class="form-input" name="formula_name_${formulaCount}" placeholder="Nom de la formule">
+          <input type="number" class="form-input" name="formula_price_${formulaCount}" placeholder="Prix" style="width: 120px;">
+          <button type="button" class="btn btn-ghost btn-sm remove-formula-btn" data-index="${formulaCount}">
+            ${Components.icons.x}
+          </button>
+        </div>
+        <textarea class="form-input" name="formula_features_${formulaCount}" rows="2" placeholder="Caracteristiques (une par ligne)"></textarea>
+      `;
+      list.appendChild(div);
+
+      // Add remove listener
+      div.querySelector('.remove-formula-btn').addEventListener('click', () => div.remove());
+
+      formulaCount++;
+    });
+
+    // Add extra
+    document.getElementById('add-extra-btn')?.addEventListener('click', () => {
+      const list = document.getElementById('extras-list');
+      const emptyEl = list.querySelector('.empty-inline');
+      if (emptyEl) emptyEl.remove();
+
+      const div = document.createElement('div');
+      div.className = 'pricing-extra-row';
+      div.dataset.index = extraCount;
+      div.innerHTML = `
+        <input type="text" class="form-input" name="extra_name_${extraCount}" placeholder="Nom de l'option">
+        <input type="number" class="form-input" name="extra_price_${extraCount}" placeholder="Prix" style="width: 100px;">
+        <input type="text" class="form-input" name="extra_unit_${extraCount}" placeholder="/h, /pers..." style="width: 80px;">
+        <button type="button" class="btn btn-ghost btn-sm remove-extra-btn" data-index="${extraCount}">
+          ${Components.icons.x}
+        </button>
+      `;
+      list.appendChild(div);
+
+      div.querySelector('.remove-extra-btn').addEventListener('click', () => div.remove());
+
+      extraCount++;
+    });
+
+    // Remove formula/extra listeners
+    document.querySelectorAll('.remove-formula-btn').forEach(btn => {
+      btn.addEventListener('click', () => btn.closest('.pricing-formula-card').remove());
+    });
+
+    document.querySelectorAll('.remove-extra-btn').forEach(btn => {
+      btn.addEventListener('click', () => btn.closest('.pricing-extra-row').remove());
+    });
+
+    // Save pricing
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('save-pricing-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loader loader-sm"></span> Enregistrement...';
+
+      // Collect formulas
+      const formulas = [];
+      document.querySelectorAll('.pricing-formula-card').forEach(card => {
+        const index = card.dataset.index;
+        const name = form.querySelector(`[name="formula_name_${index}"]`)?.value;
+        const price = form.querySelector(`[name="formula_price_${index}"]`)?.value;
+        const featuresText = form.querySelector(`[name="formula_features_${index}"]`)?.value || '';
+
+        if (name && price) {
+          formulas.push({
+            name,
+            price: parseInt(price),
+            features: featuresText.split('\n').filter(f => f.trim())
+          });
+        }
+      });
+
+      // Collect extras
+      const extras = [];
+      document.querySelectorAll('.pricing-extra-row').forEach(row => {
+        const index = row.dataset.index;
+        const name = form.querySelector(`[name="extra_name_${index}"]`)?.value;
+        const price = form.querySelector(`[name="extra_price_${index}"]`)?.value;
+        const unit = form.querySelector(`[name="extra_unit_${index}"]`)?.value || '';
+
+        if (name && price) {
+          extras.push({ name, price: parseInt(price), unit });
+        }
+      });
+
+      const result = await ProviderService.updatePricing(this.state.currentUser.id, { formulas, extras });
+
+      if (result.success) {
+        Components.showToast({ type: 'success', message: 'Tarifs enregistres' });
+        const providerResult = await ProviderService.getProvider(this.state.currentUser.id);
+        if (providerResult.success) {
+          this.state.userProvider = providerResult.data;
+        }
+      } else {
+        Components.showToast({ type: 'error', message: 'Erreur lors de l\'enregistrement' });
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `${Components.icons.check} Enregistrer les tarifs`;
+    });
+  },
+
+  initGalleryFeatures() {
+    const galleryInput = document.getElementById('gallery-input');
+    const uploadBtn = document.getElementById('upload-photos-btn');
+    const uploadFirstBtn = document.getElementById('upload-first-photos-btn');
+
+    const triggerUpload = () => galleryInput.click();
+
+    uploadBtn?.addEventListener('click', triggerUpload);
+    uploadFirstBtn?.addEventListener('click', triggerUpload);
+
+    galleryInput?.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
+      const progressEl = document.getElementById('upload-progress');
+      const progressFill = document.getElementById('upload-progress-fill');
+      const progressText = document.getElementById('upload-progress-text');
+
+      progressEl.style.display = 'block';
+
+      const gallery = [...(this.state.userProvider.gallery || [])];
+      let completed = 0;
+
+      for (const file of files) {
+        progressText.textContent = `Upload ${completed + 1}/${files.length}...`;
+        progressFill.style.width = `${(completed / files.length) * 100}%`;
+
+        const result = await StorageService.uploadImage(this.state.currentUser.id, file, 'gallery');
+        if (result.success) {
+          gallery.push(result.url);
+        }
+        completed++;
+      }
+
+      progressFill.style.width = '100%';
+      progressText.textContent = 'Finalisation...';
+
+      // Save gallery
+      await ProviderService.updateGallery(this.state.currentUser.id, gallery);
+
+      // Refresh
+      const providerResult = await ProviderService.getProvider(this.state.currentUser.id);
+      if (providerResult.success) {
+        this.state.userProvider = providerResult.data;
+      }
+
+      Components.showToast({
+        type: 'success',
+        title: 'Photos ajoutees',
+        message: `${files.length} photo(s) telechargee(s)`
+      });
+
+      this.renderDashboardPage('galerie');
+    });
+
+    // Delete photo
+    document.querySelectorAll('.gallery-item-delete').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const url = btn.dataset.url;
+        if (confirm('Supprimer cette photo ?')) {
+          await StorageService.deleteImage(url);
+          const gallery = this.state.userProvider.gallery.filter(u => u !== url);
+          await ProviderService.updateGallery(this.state.currentUser.id, gallery);
+
+          const providerResult = await ProviderService.getProvider(this.state.currentUser.id);
+          if (providerResult.success) {
+            this.state.userProvider = providerResult.data;
+          }
+
+          Components.showToast({ type: 'success', message: 'Photo supprimee' });
+          this.renderDashboardPage('galerie');
+        }
+      });
+    });
+  },
+
+  // ----------------------------------------
   // GLOBAL FEATURES
   // ----------------------------------------
   setupGlobalListeners() {
@@ -1600,19 +2360,11 @@ const App = {
       }
     }, 100));
 
-    // Mobile menu
-    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
-      document.getElementById('mobile-nav').classList.add('open');
-      document.body.classList.add('no-scroll');
-    });
-
-    document.getElementById('mobile-nav-close')?.addEventListener('click', () => {
-      this.closeMobileMenu();
-    });
-
-    // Close mobile menu on link click
-    document.querySelectorAll('.mobile-nav-link').forEach(link => {
-      link.addEventListener('click', () => this.closeMobileMenu());
+    // Close mobile menu on link click (delegate)
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.mobile-nav-link')) {
+        this.closeMobileMenu();
+      }
     });
 
     // Favorites
