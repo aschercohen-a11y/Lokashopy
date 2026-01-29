@@ -2501,26 +2501,32 @@ const App = {
 
     // User menu dropdown (event delegation)
     document.addEventListener('click', (e) => {
-      const userMenuBtn = e.target.closest('#user-menu-btn');
       const userDropdown = document.getElementById('user-dropdown');
 
-      if (userMenuBtn && userDropdown) {
+      // Click sur le bouton du menu utilisateur
+      if (e.target.closest('#user-menu-btn')) {
+        e.preventDefault();
         e.stopPropagation();
-        userDropdown.classList.toggle('open');
+        if (userDropdown) {
+          userDropdown.classList.toggle('open');
+          console.log('User menu toggled:', userDropdown.classList.contains('open'));
+        }
+        return;
+      }
+
+      // Click sur le bouton de déconnexion
+      if (e.target.closest('#logout-btn') || e.target.closest('#mobile-logout-btn')) {
+        e.preventDefault();
+        if (userDropdown) userDropdown.classList.remove('open');
+        this.handleLogout();
         return;
       }
 
       // Fermer le dropdown si on clique ailleurs
-      if (userDropdown && !e.target.closest('#user-dropdown')) {
-        userDropdown.classList.remove('open');
-      }
-    });
-
-    // Logout button (event delegation)
-    document.addEventListener('click', (e) => {
-      if (e.target.closest('#logout-btn') || e.target.closest('#mobile-logout-btn')) {
-        e.preventDefault();
-        this.handleLogout();
+      if (userDropdown && userDropdown.classList.contains('open')) {
+        if (!e.target.closest('#user-dropdown') && !e.target.closest('#user-menu-btn')) {
+          userDropdown.classList.remove('open');
+        }
       }
     });
 
