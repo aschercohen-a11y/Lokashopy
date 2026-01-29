@@ -2169,11 +2169,6 @@ const App = {
     }
   },
 
-  // Handler global pour le formulaire tarifs (event delegation)
-  async handlePricingFormSubmit(form) {
-    // Handled by initPricingFeatures
-  },
-
   initEquipmentsFeatures() {
     // Add booth buttons
     const addBoothBtn = document.getElementById('add-booth-btn');
@@ -2500,10 +2495,8 @@ const App = {
       if (form.id === 'profile-form') {
         e.preventDefault();
         this.handleProfileFormSubmit(form);
-      } else if (form.id === 'pricing-form') {
-        e.preventDefault();
-        this.handlePricingFormSubmit(form);
       }
+      // Note: pricing-form est gere par initPricingFeatures
     });
 
     // Header scroll effect
