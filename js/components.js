@@ -956,7 +956,7 @@ const Components = {
             Mes photobooths
           </a>
           <div class="user-dropdown-divider"></div>
-          <button class="user-dropdown-item" id="logout-btn">
+          <button class="user-dropdown-item" id="logout-btn" onclick="App.handleLogout();" type="button">
             ${this.icons.x}
             Deconnexion
           </button>
