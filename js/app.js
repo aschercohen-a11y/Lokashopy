@@ -2032,6 +2032,74 @@ const App = {
     });
   },
 
+  // Handler global pour le formulaire profil (event delegation)
+  async handleProfileFormSubmit(form) {
+    const formData = new FormData(form);
+    const submitBtn = document.getElementById('save-profile-btn');
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loader loader-sm"></span> Enregistrement...';
+    }
+
+    const uid = this.state.currentUser?.id;
+    if (!uid) {
+      Components.showToast({ type: 'error', message: 'Utilisateur non connecte' });
+      return;
+    }
+
+    try {
+      // Update profile
+      await ProviderService.updateProfile(uid, {
+        name: formData.get('name'),
+        description: formData.get('description')
+      });
+
+      // Update location
+      await ProviderService.updateLocation(uid, {
+        address: formData.get('address'),
+        postalCode: formData.get('postalCode'),
+        city: formData.get('city'),
+        department: formData.get('department')
+      });
+
+      // Update contact
+      await ProviderService.updateContact(uid, {
+        phone: formData.get('phone'),
+        website: formData.get('website'),
+        email: this.state.currentUser.email,
+        social: {
+          instagram: formData.get('instagram'),
+          facebook: formData.get('facebook')
+        }
+      });
+
+      // Refresh provider data
+      const result = await ProviderService.getProvider(uid);
+      if (result.success) {
+        this.state.userProvider = result.data;
+      }
+
+      Components.showToast({
+        type: 'success',
+        title: 'Profil mis a jour',
+        message: 'Vos modifications ont ete enregistrees.'
+      });
+    } catch (error) {
+      Components.showToast({ type: 'error', message: 'Erreur lors de la sauvegarde' });
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `${Components.icons.check} Enregistrer les modifications`;
+    }
+  },
+
+  // Handler global pour le formulaire tarifs (event delegation)
+  async handlePricingFormSubmit(form) {
+    // Handled by initPricingFeatures
+  },
+
   initEquipmentsFeatures() {
     // Add booth buttons
     const addBoothBtn = document.getElementById('add-booth-btn');
@@ -2352,6 +2420,18 @@ const App = {
   // GLOBAL FEATURES
   // ----------------------------------------
   setupGlobalListeners() {
+    // Global form submit handler (event delegation for dashboard forms)
+    document.addEventListener('submit', (e) => {
+      const form = e.target;
+      if (form.id === 'profile-form') {
+        e.preventDefault();
+        this.handleProfileFormSubmit(form);
+      } else if (form.id === 'pricing-form') {
+        e.preventDefault();
+        this.handlePricingFormSubmit(form);
+      }
+    });
+
     // Header scroll effect
     window.addEventListener('scroll', Utils.throttle(() => {
       const header = document.getElementById('header');
