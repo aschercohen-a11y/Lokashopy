@@ -447,21 +447,8 @@ const App = {
   // ----------------------------------------
   // PAGE D'ACCUEIL
   // ----------------------------------------
-  async renderHomePage() {
+  renderHomePage() {
     const main = document.getElementById('main-content');
-
-    // Charger les vrais prestataires depuis Supabase
-    let featuredProviders = [];
-    if (typeof ProviderService !== 'undefined') {
-      const result = await ProviderService.getAllProviders();
-      if (result.success && result.data.length > 0) {
-        featuredProviders = result.data.slice(0, 5).map(p => ({
-          ...p,
-          cover: p.gallery?.length > 0 ? p.gallery : ['https://placehold.co/800x500/1a1a2e/ffffff?text=' + encodeURIComponent(p.name)],
-          logo: p.logo || 'https://placehold.co/100x100/ff2d6a/ffffff?text=' + encodeURIComponent(p.name.charAt(0))
-        }));
-      }
-    }
 
     main.innerHTML = `
       <!-- Hero Section -->
@@ -518,17 +505,11 @@ const App = {
             Des professionnels de confiance pour vos evenements
           </p>
 
-          ${featuredProviders.length > 0 ? `
-            <div class="providers-carousel">
-              <div class="providers-carousel-track">
-                ${featuredProviders.map(provider => Components.renderProviderCard(provider)).join('')}
-              </div>
+          <div id="featured-providers-container">
+            <div style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+              <div class="loader"></div>
             </div>
-          ` : `
-            <div class="text-center" style="padding: 40px 20px;">
-              <p style="color: var(--color-gray-500);">Les prestataires arrivent bientot !</p>
-            </div>
-          `}
+          </div>
 
           <div class="text-center mt-8">
             <a href="/recherche" class="btn btn-primary btn-lg" data-nav="search">
@@ -594,6 +575,51 @@ const App = {
 
     // Scroll reveal
     Utils.initScrollReveal();
+
+    // Charger les prestataires depuis Supabase
+    this.loadFeaturedProviders();
+  },
+
+  async loadFeaturedProviders() {
+    const container = document.getElementById('featured-providers-container');
+    if (!container) return;
+
+    if (typeof ProviderService !== 'undefined') {
+      try {
+        const result = await ProviderService.getAllProviders();
+        if (result.success && result.data.length > 0) {
+          const providers = result.data.slice(0, 5).map(p => ({
+            ...p,
+            cover: p.gallery?.length > 0 ? p.gallery : ['https://placehold.co/800x500/1a1a2e/ffffff?text=' + encodeURIComponent(p.name)],
+            logo: p.logo || 'https://placehold.co/100x100/ff2d6a/ffffff?text=' + encodeURIComponent(p.name.charAt(0))
+          }));
+
+          container.innerHTML = `
+            <div class="providers-carousel">
+              <div class="providers-carousel-track">
+                ${providers.map(provider => Components.renderProviderCard(provider)).join('')}
+              </div>
+            </div>
+          `;
+
+          // Initialiser le lazy loading pour les nouvelles images
+          Utils.lazyLoadImages();
+        } else {
+          container.innerHTML = `
+            <div class="text-center" style="padding: 40px 20px;">
+              <p style="color: var(--color-gray-500);">Aucun prestataire pour le moment. Soyez le premier !</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading providers:', error);
+        container.innerHTML = `
+          <div class="text-center" style="padding: 40px 20px;">
+            <p style="color: var(--color-gray-500);">Erreur de chargement</p>
+          </div>
+        `;
+      }
+    }
   },
 
   // ----------------------------------------
