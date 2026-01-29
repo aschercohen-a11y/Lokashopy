@@ -588,11 +588,7 @@ const App = {
       try {
         const result = await ProviderService.getAllProviders();
         if (result.success && result.data.length > 0) {
-          const providers = result.data.slice(0, 5).map(p => ({
-            ...p,
-            cover: p.gallery?.length > 0 ? p.gallery : ['https://placehold.co/800x500/1a1a2e/ffffff?text=' + encodeURIComponent(p.name)],
-            logo: p.logo || 'https://placehold.co/100x100/ff2d6a/ffffff?text=' + encodeURIComponent(p.name.charAt(0))
-          }));
+          const providers = result.data.slice(0, 5);
 
           container.innerHTML = `
             <div class="providers-carousel">
@@ -640,11 +636,7 @@ const App = {
     if (typeof ProviderService !== 'undefined') {
       const result = await ProviderService.getAllProviders();
       if (result.success) {
-        this.state.loadedProviders = result.data.map(p => ({
-          ...p,
-          cover: p.gallery?.length > 0 ? p.gallery : ['https://placehold.co/800x500/1a1a2e/ffffff?text=' + encodeURIComponent(p.name)],
-          logo: p.logo || 'https://placehold.co/100x100/ff2d6a/ffffff?text=' + encodeURIComponent(p.name.charAt(0))
-        }));
+        this.state.loadedProviders = result.data;
       }
     }
 

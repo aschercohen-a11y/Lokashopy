@@ -244,33 +244,59 @@ const ProviderService = {
 
   // Transformer les donnees Supabase vers le format public (pour les cartes et pages publiques)
   transformToPublicFormat(data) {
+    const booths = data.booths || [];
+    const formulas = data.pricing_formulas || [];
+    const gallery = data.gallery || [];
+
+    // Extraire les types de booths
+    const boothTypes = booths.map(b => b.type).filter(Boolean);
+
+    // Calculer le prix minimum
+    let priceFrom = 0;
+    if (formulas.length > 0) {
+      priceFrom = Math.min(...formulas.map(f => f.price || 0).filter(p => p > 0)) || 0;
+    } else if (booths.length > 0) {
+      priceFrom = Math.min(...booths.map(b => b.priceFrom || 0).filter(p => p > 0)) || 0;
+    }
+
+    // Image de couverture
+    const cover = gallery.length > 0
+      ? gallery
+      : ['https://placehold.co/800x500/1a1a2e/ffffff?text=' + encodeURIComponent(data.name || 'Prestataire')];
+
+    // Logo
+    const logo = data.logo_url || 'https://placehold.co/100x100/ff2d6a/ffffff?text=' + encodeURIComponent((data.name || 'P').charAt(0));
+
     return {
       id: data.id,
       slug: data.slug,
-      name: data.name,
-      description: data.description,
-      logo: data.logo_url,
+      name: data.name || 'Sans nom',
+      description: data.description || '',
+      logo: logo,
+      cover: cover,
       location: {
-        city: data.city,
-        department: data.department,
-        address: data.address
+        city: data.city || 'France',
+        department: data.department || '',
+        address: data.address || ''
       },
       contact: {
-        phone: data.phone,
-        email: data.email,
-        website: data.website,
+        phone: data.phone || '',
+        email: data.email || '',
+        website: data.website || '',
         social: {
-          instagram: data.instagram,
-          facebook: data.facebook
+          instagram: data.instagram || '',
+          facebook: data.facebook || ''
         }
       },
-      booths: data.booths || [],
+      booths: booths,
+      boothTypes: boothTypes.length > 0 ? boothTypes : ['photobooth'],
+      priceFrom: priceFrom,
       pricing: {
-        formulas: data.pricing_formulas || [],
+        formulas: formulas,
         extras: data.pricing_extras || []
       },
-      gallery: data.gallery || [],
-      verified: data.verified,
+      gallery: gallery,
+      verified: data.verified || false,
       rating: 5.0,
       reviewCount: 0,
       stats: {
