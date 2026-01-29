@@ -16,7 +16,9 @@ const App = {
     userProvider: null,
     isAuthenticated: false,
     authInitialized: false,
-    dashboardTab: 'overview'
+    dashboardTab: 'overview',
+    // Providers loaded from Supabase
+    loadedProviders: []
   },
 
   // ----------------------------------------
@@ -445,11 +447,21 @@ const App = {
   // ----------------------------------------
   // PAGE D'ACCUEIL
   // ----------------------------------------
-  renderHomePage() {
+  async renderHomePage() {
     const main = document.getElementById('main-content');
 
-    // Featured providers (5 premiers)
-    const featuredProviders = DATA.PROVIDERS.slice(0, 5);
+    // Charger les vrais prestataires depuis Supabase
+    let featuredProviders = [];
+    if (typeof ProviderService !== 'undefined') {
+      const result = await ProviderService.getAllProviders();
+      if (result.success && result.data.length > 0) {
+        featuredProviders = result.data.slice(0, 5).map(p => ({
+          ...p,
+          cover: p.gallery?.length > 0 ? p.gallery : ['https://placehold.co/800x500/1a1a2e/ffffff?text=' + encodeURIComponent(p.name)],
+          logo: p.logo || 'https://placehold.co/100x100/ff2d6a/ffffff?text=' + encodeURIComponent(p.name.charAt(0))
+        }));
+      }
+    }
 
     main.innerHTML = `
       <!-- Hero Section -->
@@ -501,16 +513,22 @@ const App = {
       <!-- Featured Providers -->
       <section class="section featured-providers">
         <div class="container">
-          <h2 class="section-title">Nos prestataires vedettes</h2>
+          <h2 class="section-title">Nos prestataires</h2>
           <p class="section-subtitle">
-            Des professionnels de confiance plebiscites par leurs clients
+            Des professionnels de confiance pour vos evenements
           </p>
 
-          <div class="providers-carousel">
-            <div class="providers-carousel-track">
-              ${featuredProviders.map(provider => Components.renderProviderCard(provider)).join('')}
+          ${featuredProviders.length > 0 ? `
+            <div class="providers-carousel">
+              <div class="providers-carousel-track">
+                ${featuredProviders.map(provider => Components.renderProviderCard(provider)).join('')}
+              </div>
             </div>
-          </div>
+          ` : `
+            <div class="text-center" style="padding: 40px 20px;">
+              <p style="color: var(--color-gray-500);">Les prestataires arrivent bientot !</p>
+            </div>
+          `}
 
           <div class="text-center mt-8">
             <a href="/recherche" class="btn btn-primary btn-lg" data-nav="search">
@@ -581,11 +599,31 @@ const App = {
   // ----------------------------------------
   // PAGE DE RECHERCHE
   // ----------------------------------------
-  renderSearchPage(filters = {}) {
+  async renderSearchPage(filters = {}) {
     const main = document.getElementById('main-content');
 
+    // Afficher un loader pendant le chargement
+    main.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; min-height: 400px; flex-direction: column; gap: 16px;">
+        <div class="loader"></div>
+        <p style="color: #6B7280;">Chargement des prestataires...</p>
+      </div>
+    `;
+
+    // Charger les vrais prestataires depuis Supabase
+    if (typeof ProviderService !== 'undefined') {
+      const result = await ProviderService.getAllProviders();
+      if (result.success) {
+        this.state.loadedProviders = result.data.map(p => ({
+          ...p,
+          cover: p.gallery?.length > 0 ? p.gallery : ['https://placehold.co/800x500/1a1a2e/ffffff?text=' + encodeURIComponent(p.name)],
+          logo: p.logo || 'https://placehold.co/100x100/ff2d6a/ffffff?text=' + encodeURIComponent(p.name.charAt(0))
+        }));
+      }
+    }
+
     // Filtrer et trier les prestataires
-    let providers = Utils.filterProviders(DATA.PROVIDERS, filters);
+    let providers = Utils.filterProviders(this.state.loadedProviders, filters);
     providers = Utils.sortProviders(providers, filters.sort || 'relevance');
 
     main.innerHTML = `
@@ -726,7 +764,7 @@ const App = {
                 Vue carte (integration carte a venir)
               </p>
             </div>
-            ${DATA.PROVIDERS.slice(0, 5).map((p, i) => `
+            ${this.state.loadedProviders.slice(0, 5).map((p, i) => `
               <div class="map-marker" style="top: ${20 + i * 15}%; left: ${15 + i * 12}%;"
                    data-provider-id="${p.id}" title="${p.name}"></div>
             `).join('')}
@@ -734,7 +772,7 @@ const App = {
         </div>
       `;
     } else {
-      let providers = Utils.filterProviders(DATA.PROVIDERS, this.state.searchFilters);
+      let providers = Utils.filterProviders(this.state.loadedProviders, this.state.searchFilters);
       providers = Utils.sortProviders(providers, this.state.searchFilters.sort || 'relevance');
 
       container.className = view === 'list' ? 'results-list' : 'results-grid';
@@ -833,7 +871,7 @@ const App = {
   },
 
   updateSearchResults() {
-    let providers = Utils.filterProviders(DATA.PROVIDERS, this.state.searchFilters);
+    let providers = Utils.filterProviders(this.state.loadedProviders, this.state.searchFilters);
     providers = Utils.sortProviders(providers, this.state.searchFilters.sort || 'relevance');
 
     const container = document.getElementById('results-container');
