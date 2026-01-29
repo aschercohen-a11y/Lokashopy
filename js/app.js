@@ -216,10 +216,11 @@ const App = {
   // ----------------------------------------
   renderLayout() {
     const app = document.getElementById('app');
+    const isDashboard = this.state.currentPage === 'dashboard' || window.location.pathname.startsWith('/dashboard');
     app.innerHTML = `
-      ${Components.renderHeader(this.state.isAuthenticated, this.state.currentUser, this.state.userProvider)}
+      ${Components.renderHeader(this.state.isAuthenticated, this.state.currentUser, this.state.userProvider, isDashboard)}
       <main id="main-content"></main>
-      ${Components.renderFooter()}
+      ${isDashboard ? '' : Components.renderFooter()}
       ${Components.renderLightbox()}
       ${Components.renderLoginModal()}
       ${Components.renderRegisterModal()}
@@ -384,6 +385,11 @@ const App = {
       window.history.pushState({}, '', path);
     }
 
+    // Detecter si on change de/vers le dashboard pour mettre a jour le header
+    const wasDashboard = this.state.currentPage === 'dashboard';
+    const isDashboard = pathname.startsWith('/dashboard');
+    const needsHeaderUpdate = wasDashboard !== isDashboard;
+
     // Router vers la bonne page
     if (pathname === '/' || pathname === '/index.html') {
       this.renderHomePage();
@@ -426,6 +432,11 @@ const App = {
 
     // Scroll en haut
     window.scrollTo(0, 0);
+
+    // Mettre a jour le header si on passe vers/depuis le dashboard
+    if (needsHeaderUpdate) {
+      this.updateHeader();
+    }
 
     // Mettre a jour la navigation active
     this.updateActiveNav();

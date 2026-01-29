@@ -55,7 +55,7 @@ const Components = {
   // ----------------------------------------
   // HEADER
   // ----------------------------------------
-  renderHeader(isAuthenticated = false, user = null, providerData = null) {
+  renderHeader(isAuthenticated = false, user = null, providerData = null, isDashboard = false) {
     const authSection = isAuthenticated
       ? this.renderUserMenu(user, providerData)
       : `
@@ -71,7 +71,7 @@ const Components = {
           <a href="/dashboard" class="btn btn-primary" data-nav="dashboard">
             ${this.icons.grid} Tableau de bord
           </a>
-          <button class="btn btn-outline" id="mobile-logout-btn">Deconnexion</button>
+          <button class="btn btn-outline" id="mobile-logout-btn" onclick="App.handleLogout();">Deconnexion</button>
         </div>
       `
       : `
@@ -80,6 +80,24 @@ const Components = {
           <button class="btn btn-primary" id="mobile-signup-btn">Inscription</button>
         </div>
       `;
+
+    // Si on est sur le dashboard, afficher un header simplifie
+    if (isDashboard) {
+      return `
+        <header class="header header-dashboard" id="header">
+          <div class="header-container">
+            <a href="/" class="logo" data-nav="home">
+              <span class="logo-icon">${this.icons.camera}</span>
+              Loka<span>shopy</span>
+            </a>
+
+            <div class="header-actions">
+              ${authSection}
+            </div>
+          </div>
+        </header>
+      `;
+    }
 
     return `
       <header class="header" id="header">

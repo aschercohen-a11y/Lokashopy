@@ -69,6 +69,11 @@
   gap: var(--spacing-3);
 }
 
+/* Header simplifie pour le dashboard */
+.header-dashboard .header-container {
+  justify-content: space-between;
+}
+
 .nav-links {
   display: flex;
   align-items: center;
