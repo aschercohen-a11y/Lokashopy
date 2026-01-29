@@ -98,12 +98,14 @@ const Components = {
                 : `<li><a href="/inscription-prestataire" class="nav-link" data-nav="register">Devenir prestataire</a></li>`
               }
             </ul>
-            ${authSection}
           </nav>
 
-          <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
-            ${this.icons.menu}
-          </button>
+          <div class="header-actions">
+            ${authSection}
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+              ${this.icons.menu}
+            </button>
+          </div>
         </div>
       </header>
 
