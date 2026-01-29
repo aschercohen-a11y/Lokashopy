@@ -2499,6 +2499,31 @@ const App = {
       // Note: pricing-form est gere par initPricingFeatures
     });
 
+    // User menu dropdown (event delegation)
+    document.addEventListener('click', (e) => {
+      const userMenuBtn = e.target.closest('#user-menu-btn');
+      const userDropdown = document.getElementById('user-dropdown');
+
+      if (userMenuBtn && userDropdown) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('open');
+        return;
+      }
+
+      // Fermer le dropdown si on clique ailleurs
+      if (userDropdown && !e.target.closest('#user-dropdown')) {
+        userDropdown.classList.remove('open');
+      }
+    });
+
+    // Logout button (event delegation)
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#logout-btn') || e.target.closest('#mobile-logout-btn')) {
+        e.preventDefault();
+        this.handleLogout();
+      }
+    });
+
     // Header scroll effect
     window.addEventListener('scroll', Utils.throttle(() => {
       const header = document.getElementById('header');
