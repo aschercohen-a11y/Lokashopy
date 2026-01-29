@@ -180,7 +180,7 @@ const AuthService = {
 // SERVICE PROVIDER (DONNEES PRESTATAIRE)
 // ----------------------------------------
 const ProviderService = {
-  // Obtenir les donnees du prestataire
+  // Obtenir les donnees du prestataire par ID
   async getProvider(uid) {
     try {
       const { data, error } = await supabaseClient
@@ -191,7 +191,6 @@ const ProviderService = {
 
       if (error) throw error;
 
-      // Transformer les donnees pour correspondre au format attendu par l'app
       return {
         success: true,
         data: this.transformProviderData(data)
@@ -200,6 +199,86 @@ const ProviderService = {
       console.error('Get provider error:', error);
       return { success: false, error: error.message };
     }
+  },
+
+  // Obtenir un prestataire par son slug (pour la page publique)
+  async getProviderBySlug(slug) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('providers')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        data: this.transformToPublicFormat(data)
+      };
+    } catch (error) {
+      console.error('Get provider by slug error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Obtenir tous les prestataires (pour la recherche)
+  async getAllProviders() {
+    try {
+      const { data, error } = await supabaseClient
+        .from('providers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        data: data.map(p => this.transformToPublicFormat(p))
+      };
+    } catch (error) {
+      console.error('Get all providers error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Transformer les donnees Supabase vers le format public (pour les cartes et pages publiques)
+  transformToPublicFormat(data) {
+    return {
+      id: data.id,
+      slug: data.slug,
+      name: data.name,
+      description: data.description,
+      logo: data.logo_url,
+      location: {
+        city: data.city,
+        department: data.department,
+        address: data.address
+      },
+      contact: {
+        phone: data.phone,
+        email: data.email,
+        website: data.website,
+        social: {
+          instagram: data.instagram,
+          facebook: data.facebook
+        }
+      },
+      booths: data.booths || [],
+      pricing: {
+        formulas: data.pricing_formulas || [],
+        extras: data.pricing_extras || []
+      },
+      gallery: data.gallery || [],
+      verified: data.verified,
+      rating: 5.0,
+      reviewCount: 0,
+      stats: {
+        views: data.views || 0,
+        quotes: data.quotes || 0,
+        favorites: data.favorites || 0
+      }
+    };
   },
 
   // Transformer les donnees Supabase vers le format de l'app

@@ -891,8 +891,26 @@ const App = {
   // ----------------------------------------
   // PAGE PRESTATAIRE
   // ----------------------------------------
-  renderProviderPage(slug) {
-    const provider = DATA.PROVIDERS.find(p => p.slug === slug);
+  async renderProviderPage(slug) {
+    // D'abord essayer Supabase, puis fallback sur les donnees demo
+    let provider = null;
+
+    if (typeof ProviderService !== 'undefined') {
+      const result = await ProviderService.getProviderBySlug(slug);
+      if (result.success) {
+        provider = result.data;
+        // Adapter le format pour correspondre au format attendu
+        provider.cover = provider.gallery?.length > 0 ? provider.gallery : ['https://placehold.co/1200x600/1a1a2e/ffffff?text=' + encodeURIComponent(provider.name)];
+        if (!provider.logo) {
+          provider.logo = 'https://placehold.co/100x100/ff2d6a/ffffff?text=' + encodeURIComponent(provider.name.charAt(0));
+        }
+      }
+    }
+
+    // Fallback sur les donnees demo si pas trouve dans Supabase
+    if (!provider) {
+      provider = DATA.PROVIDERS.find(p => p.slug === slug);
+    }
 
     if (!provider) {
       this.navigate('/');
