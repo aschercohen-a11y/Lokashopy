@@ -1,6 +1,6 @@
 # Historique de Session Claude - Lokashopy
 
-## Date : 28 Janvier 2026
+## Date : 29 Janvier 2026
 
 ---
 
@@ -14,79 +14,74 @@ Plateforme de mise en relation pour la location de photobooths en France.
 
 ---
 
-## Travail effectue durant cette session
+## Sessions precedentes (28 Janvier 2026)
 
 ### 1. Correction des images sur la page recherche
-
-**Probleme :** Les images des prestataires ne s'affichaient pas sur la page de recherche.
-
-**Cause identifiee :**
-- Le CSS avait `opacity: 0` pour `img[loading="lazy"]`
-- La fonction `Utils.lazyLoadImages()` n'etait appelee qu'au chargement initial, pas apres la navigation SPA
-
-**Solution :**
-- Ajout de `Utils.lazyLoadImages()` a la fin de la fonction `navigate()` dans `js/app.js`
-- Cela permet d'attacher les event listeners aux nouvelles images apres chaque navigation
-
-**Fichier modifie :** `js/app.js` (ligne ~121)
-
----
+- Ajout de `Utils.lazyLoadImages()` dans `navigate()` pour le lazy loading apres navigation SPA
 
 ### 2. Deploiement sur Vercel
+- Initialisation Git, creation .gitignore
+- Push vers GitHub : `https://github.com/aschercohen-a11y/Lokashopy.git`
+- Deploiement automatique sur Vercel
 
-**Etapes realisees :**
-
-1. **Initialisation Git**
-   ```bash
-   git init
-   git config user.name "aschercohen-a11y"
-   git config user.email "aschercohen@gmail.com"
-   ```
-
-2. **Creation du .gitignore**
-   - node_modules/
-   - .DS_Store, Thumbs.db
-   - .vscode/, .idea/
-   - .claude/
-   - *.log
-
-3. **Premier commit**
-   ```bash
-   git add -A
-   git commit -m "Initial commit - BoothFinder photobooth rental portal"
-   ```
-
-4. **Connexion a GitHub**
-   - Repository cree : `Lokashopy`
-   - Remote ajoute : `https://github.com/aschercohen-a11y/Lokashopy.git`
-   ```bash
-   git remote add origin https://github.com/aschercohen-a11y/Lokashopy.git
-   git branch -M main
-   git push -u origin main
-   ```
-
-5. **Deploiement Vercel**
-   - Compte Vercel cree (via GitHub)
-   - Import du repository Lokashopy
-   - Deploiement automatique configure
+### 3. Renommage BoothFinder -> Lokashopy
+- Mise a jour de tous les fichiers avec le nouveau nom
 
 ---
 
-### 3. Renommage BoothFinder -> Lokashopy
+## Session actuelle (29 Janvier 2026)
 
-**Fichiers modifies :**
-- `index.html` : meta tags, titre, favicon (B -> L), URLs
-- `js/app.js` : references BoothFinder
-- `js/components.js` : logo "Booth<span>Finder</span>" -> "Loka<span>shopy</span>"
-- `js/data.js` : commentaires et references
+### 1. Integration complete de Supabase
 
-**Commit :**
-```bash
-git commit -m "Rename BoothFinder to Lokashopy"
-git push
+**Nouveau fichier cree : `js/supabase-config.js`**
+
+Contient 3 services :
+- **AuthService** : Inscription, connexion, deconnexion, gestion session
+- **ProviderService** : CRUD des prestataires, upload images
+- **StorageService** : Gestion des fichiers dans Supabase Storage
+
+**Configuration Supabase :**
+```javascript
+const SUPABASE_URL = 'https://cagygpiweqejbiofknxl.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_xhEh9oudRscxqKTJ5zfgKA_4VF1RXgv';
 ```
 
-Vercel a automatiquement redeploy le site.
+### 2. Bugs corriges durant cette session
+
+| Bug | Cause | Solution |
+|-----|-------|----------|
+| `Identifier 'supabase' already declared` | Conflit avec le SDK global | Renomme en `supabaseClient` |
+| Inscription qui mouline indefiniment | Email confirmation active | Desactive "Confirm email" dans Supabase |
+| Formulaire profil 404 | Soumission GET au lieu de JS | Event delegation pour `profile-form` |
+| `Cannot read 'slice' of undefined` sur boothTypes | Donnees manquantes | Ajout `boothTypes`, `priceFrom`, `cover` dans `transformToPublicFormat()` |
+| Page d'accueil blanche | `renderHomePage()` async non await | Rendu sync + chargement async via `loadFeaturedProviders()` |
+| "Erreur de chargement" sur home | Policies RLS manquantes | Recreation des policies SELECT public |
+| Formules tarifs non sauvegardees | Event delegation interceptait `pricing-form` | Retire du handler global |
+| Menu utilisateur non cliquable | Event delegation ne fonctionnait pas | Ajout `onclick` inline sur le bouton |
+| Bouton deconnexion inactif | Meme probleme | Ajout `onclick="App.handleLogout();"` inline |
+
+### 3. Suppression des faux prestataires
+
+**Modifications :**
+- Page recherche : charge depuis Supabase au lieu de `DATA.PROVIDERS`
+- Page accueil : charge les prestataires "featured" depuis Supabase
+- Ajout de `state.loadedProviders` pour tracker les donnees
+- Nouvelles fonctions : `getAllProviders()`, `getProviderBySlug()`
+
+### 4. Header simplifie pour le dashboard
+
+**Demande :** Quand on est dans le dashboard, ne pas afficher "Accueil", "Rechercher", "Tableau de bord"
+
+**Solution :**
+- Parametre `isDashboard` ajoute a `renderHeader()`
+- Detection automatique dans `renderLayout()` et `navigate()`
+- Header simplifie : logo + menu utilisateur uniquement
+- Footer masque sur le dashboard
+
+**Fichiers modifies :**
+- `js/components.js` : nouveau rendu header pour dashboard
+- `js/app.js` : detection transition vers/depuis dashboard
+- `css/components.css` : styles `.header-dashboard`
 
 ---
 
@@ -102,7 +97,7 @@ Lokashopy/
 │   ├── pages.css           # Styles specifiques aux pages
 │   └── responsive.css      # Media queries
 ├── js/
-│   ├── data.js             # Donnees des prestataires (mock)
+│   ├── data.js             # Donnees mock (plus utilise pour les vrais prestataires)
 │   ├── utils.js            # Fonctions utilitaires
 │   ├── components.js       # Composants HTML (header, footer, cards, dashboard)
 │   ├── supabase-config.js  # Configuration Supabase + services Auth/Database/Storage
@@ -124,22 +119,21 @@ Lokashopy/
 
 ---
 
-## Fonctionnalites
+## Fonctionnalites implementees
 
-- Page d'accueil avec recherche et prestataires vedettes
+- Page d'accueil avec recherche et prestataires vedettes (depuis Supabase)
 - Page de recherche avec filtres (type, budget, options, note)
 - Pages profil prestataire avec galerie, avis, equipements
-- Formulaire d'inscription prestataire
 - Design responsive (mobile, tablet, desktop)
 - Lazy loading des images
-- **Authentification** (inscription/connexion email/mot de passe)
-- **Dashboard prestataire** :
+- **Authentification email/mot de passe**
+- **Dashboard prestataire complet :**
   - Vue d'ensemble avec statistiques
-  - Gestion du profil (infos, logo, contact)
-  - Gestion des photobooths (CRUD)
-  - Gestion des tarifs (formules, options)
+  - Gestion du profil (infos, logo, contact, reseaux sociaux)
+  - Gestion des photobooths (ajout, modification, suppression)
+  - Gestion des tarifs (formules et options supplementaires)
   - Galerie photos (upload, suppression)
-  - Consultation des avis
+  - Header simplifie sans navigation superflue
 
 ---
 
@@ -162,156 +156,73 @@ Puis ouvrir http://localhost:8000/
 
 ---
 
-## Configuration Supabase (IMPORTANT)
+## Configuration Supabase
 
-### Etape 1 : Creer un projet Supabase
+### Informations du projet actuel
 
-1. Allez sur https://supabase.com
-2. Cliquez sur "Start your project"
-3. Connectez-vous avec GitHub (recommande) ou email
-4. Cliquez "New project"
-5. Choisissez une organisation et nommez le projet (ex: "lokashopy")
-6. Choisissez un mot de passe pour la base de donnees
-7. Selectionnez la region (ex: West EU - Paris)
-8. Cliquez "Create new project" et attendez ~2 minutes
+- **URL :** `https://cagygpiweqejbiofknxl.supabase.co`
+- **Table principale :** `providers`
+- **Bucket Storage :** `provider-images`
 
-### Etape 2 : Creer la table providers
+### Structure de la table providers
 
-1. Dans le menu gauche, cliquez "Table Editor"
-2. Cliquez "Create a new table"
-3. Nom de la table : `providers`
-4. Decochez "Enable Row Level Security" (on l'activera apres)
-5. Ajoutez les colonnes suivantes :
+| Colonne | Type | Description |
+|---------|------|-------------|
+| id | uuid | Cle primaire, = auth.uid() |
+| name | text | Nom de l'entreprise |
+| slug | text | URL-friendly identifier |
+| description | text | Description longue |
+| logo_url | text | URL du logo |
+| verified | bool | Prestataire verifie |
+| email, phone | text | Contact |
+| city, department, address, postal_code | text | Localisation |
+| website, instagram, facebook | text | Liens |
+| booths | jsonb | Liste des photobooths |
+| pricing_formulas | jsonb | Formules tarifaires |
+| pricing_extras | jsonb | Options supplementaires |
+| gallery | jsonb | URLs des photos |
+| views, quotes, favorites | int4 | Statistiques |
+| plan | text | Plan (free, pro, etc.) |
+| created_at, updated_at | timestamptz | Timestamps |
 
-| Nom | Type | Options |
-|-----|------|---------|
-| id | uuid | Primary Key, Default: auth.uid() |
-| name | text | |
-| slug | text | |
-| description | text | Nullable |
-| logo_url | text | Nullable |
-| verified | bool | Default: false |
-| email | text | |
-| city | text | Nullable |
-| department | text | Nullable |
-| address | text | Nullable |
-| postal_code | text | Nullable |
-| phone | text | Nullable |
-| website | text | Nullable |
-| instagram | text | Nullable |
-| facebook | text | Nullable |
-| booths | jsonb | Default: '[]' |
-| pricing_formulas | jsonb | Default: '[]' |
-| pricing_extras | jsonb | Default: '[]' |
-| gallery | jsonb | Default: '[]' |
-| views | int4 | Default: 0 |
-| quotes | int4 | Default: 0 |
-| favorites | int4 | Default: 0 |
-| plan | text | Default: 'free' |
-| created_at | timestamptz | Default: now() |
-| updated_at | timestamptz | Default: now() |
+### Policies RLS actives
 
-6. Cliquez "Save"
+- **SELECT :** Public (tous peuvent lire)
+- **INSERT :** Authenticated, si `auth.uid() = id`
+- **UPDATE :** Authenticated, si `auth.uid() = id`
 
-### Etape 3 : Configurer Row Level Security (RLS)
+### Policies Storage
 
-1. Allez dans "Authentication" > "Policies"
-2. Trouvez la table `providers` et cliquez dessus
-3. Activez RLS avec le bouton
-4. Ajoutez ces politiques :
+- **SELECT :** Public sur `provider-images`
+- **INSERT/DELETE :** Proprietaire du dossier (`auth.uid() = folder`)
 
-**Politique SELECT (lecture publique) :**
-- Name: `Public read access`
-- Target roles: public
-- USING expression: `true`
+---
 
-**Politique INSERT (creation par l'utilisateur) :**
-- Name: `Users can create their own profile`
-- Target roles: authenticated
-- WITH CHECK expression: `auth.uid() = id`
+## Prestataire de test
 
-**Politique UPDATE (modification par le proprietaire) :**
-- Name: `Users can update their own profile`
-- Target roles: authenticated
-- USING expression: `auth.uid() = id`
-- WITH CHECK expression: `auth.uid() = id`
-
-### Etape 4 : Creer le bucket Storage
-
-1. Menu gauche > "Storage"
-2. Cliquez "Create a new bucket"
-3. Nom : `provider-images`
-4. Cochez "Public bucket"
-5. Cliquez "Create bucket"
-
-6. Cliquez sur le bucket cree puis "Policies"
-7. Ajoutez ces politiques :
-
-**SELECT (lecture publique) :**
-```sql
-bucket_id = 'provider-images'
-```
-
-**INSERT (upload par le proprietaire) :**
-```sql
-bucket_id = 'provider-images' AND auth.uid()::text = (storage.foldername(name))[1]
-```
-
-**DELETE (suppression par le proprietaire) :**
-```sql
-bucket_id = 'provider-images' AND auth.uid()::text = (storage.foldername(name))[1]
-```
-
-### Etape 5 : Recuperer les cles API
-
-1. Menu gauche > "Project Settings" (icone engrenage)
-2. Cliquez sur "API"
-3. Copiez :
-   - **Project URL** (commence par https://xxx.supabase.co)
-   - **anon public** key (longue chaine de caracteres)
-
-### Etape 6 : Mettre a jour le fichier de config
-
-Ouvrez `js/supabase-config.js` et remplacez les valeurs :
-
-```javascript
-const SUPABASE_URL = 'https://votre-project-id.supabase.co';
-const SUPABASE_ANON_KEY = 'votre-anon-key-ici';
-```
-
-### Test de l'authentification
-
-1. Lancez le site en local : `npx serve -p 8000`
-2. Cliquez sur "Inscription" dans le header
-3. Selectionnez "Prestataire"
-4. Remplissez le formulaire
-5. Verifiez votre email (Supabase envoie un email de confirmation)
-6. Connectez-vous et accedez au dashboard
-
-### Note importante
-
-Par defaut, Supabase requiert la confirmation d'email. Pour desactiver en dev :
-1. "Authentication" > "Providers" > "Email"
-2. Decochez "Confirm email"
+**Nom :** ShootnBox
+**Dashboard :** https://lokashopy.vercel.app/dashboard
+**Page publique :** https://lokashopy.vercel.app/prestataire/shootnbox
 
 ---
 
 ## Prochaines etapes possibles
 
 - [ ] Ajouter un domaine personnalise (ex: lokashopy.fr)
-- [x] ~~Implementer un vrai backend (API, base de donnees)~~ - Supabase
-- [x] ~~Ajouter l'authentification utilisateurs~~ - Supabase Auth
 - [ ] Systeme de messagerie entre clients et prestataires
 - [ ] Paiement en ligne pour les reservations
-- [x] ~~Tableau de bord prestataire~~ - Implemente
+- [ ] Systeme de notation/avis par les clients
+- [ ] Notifications par email (nouvelles demandes de devis)
+- [ ] Page "Mes favoris" pour les clients
 
 ---
 
-## Notes
+## Notes importantes
 
 - Le plan Vercel gratuit suffit pour commencer
-- Pour usage commercial, passer au plan Pro (20$/mois)
-- Les images utilisent placehold.co (placeholders), a remplacer par de vraies photos
+- Le plan Supabase gratuit inclut : 500MB database, 1GB storage, 50K auth users
+- Pour usage commercial, prevoir Supabase Pro (25$/mois) + Vercel Pro (20$/mois)
+- Les images placeholder (`placehold.co`) sont remplacees au fur et a mesure par les vraies photos
 
 ---
 
