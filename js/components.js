@@ -935,7 +935,7 @@ const Components = {
 
     return `
       <div class="user-menu" id="user-menu">
-        <button class="user-menu-btn" id="user-menu-btn">
+        <button class="user-menu-btn" id="user-menu-btn" onclick="document.getElementById('user-dropdown').classList.toggle('open'); console.log('clicked!');" type="button">
           <div class="user-avatar">
             ${logo ? `<img src="${logo}" alt="${name}">` : `<span>${initial}</span>`}
           </div>
