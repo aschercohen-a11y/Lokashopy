@@ -8,13 +8,13 @@
 const SUPABASE_URL = 'https://cagygpiweqejbiofknxl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_xhEh9oudRscxqKTJ5zfgKA_4VF1RXgv';
 
-// Client Supabase
-let supabase = null;
+// Client Supabase (utilise un nom different pour eviter le conflit avec le SDK)
+let supabaseClient = null;
 
 // Fonction d'initialisation
 function initializeSupabase() {
   if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('Supabase initialized');
     return true;
   }
@@ -30,7 +30,7 @@ const AuthService = {
   async register(email, password, userData) {
     try {
       // Creer le compte
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await supabaseClient.auth.signUp({
         email,
         password,
         options: {
@@ -47,7 +47,7 @@ const AuthService = {
       if (!user) throw new Error('Erreur lors de la creation du compte');
 
       // Creer le profil prestataire dans la table providers
-      const { error: profileError } = await supabase
+      const { error: profileError } = await supabaseClient
         .from('providers')
         .insert({
           id: user.id,
@@ -90,7 +90,7 @@ const AuthService = {
   // Connexion
   async login(email, password) {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password
       });
@@ -107,7 +107,7 @@ const AuthService = {
   // Deconnexion
   async logout() {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabaseClient.auth.signOut();
       if (error) throw error;
       return { success: true };
     } catch (error) {
@@ -119,7 +119,7 @@ const AuthService = {
   // Reinitialisation du mot de passe
   async resetPassword(email) {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/reset-password'
       });
       if (error) throw error;
@@ -131,19 +131,19 @@ const AuthService = {
 
   // Ecouter les changements d'etat d'authentification
   onAuthStateChanged(callback) {
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
       callback(session?.user || null);
     });
 
     // Verifier l'etat initial
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
       callback(session?.user || null);
     });
   },
 
   // Obtenir l'utilisateur actuel
   async getCurrentUser() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabaseClient.auth.getUser();
     return user;
   },
 
@@ -183,7 +183,7 @@ const ProviderService = {
   // Obtenir les donnees du prestataire
   async getProvider(uid) {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('providers')
         .select('*')
         .eq('id', uid)
@@ -247,7 +247,7 @@ const ProviderService = {
   // Mettre a jour le profil
   async updateProfile(uid, profileData) {
     try {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('providers')
         .update({
           name: profileData.name,
@@ -268,7 +268,7 @@ const ProviderService = {
   // Mettre a jour la localisation
   async updateLocation(uid, locationData) {
     try {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('providers')
         .update({
           city: locationData.city,
@@ -289,7 +289,7 @@ const ProviderService = {
   // Mettre a jour les contacts
   async updateContact(uid, contactData) {
     try {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('providers')
         .update({
           phone: contactData.phone,
@@ -310,7 +310,7 @@ const ProviderService = {
   // Gestion des photobooths
   async addBooth(uid, boothData) {
     try {
-      const { data: provider } = await supabase
+      const { data: provider } = await supabaseClient
         .from('providers')
         .select('booths')
         .eq('id', uid)
@@ -325,7 +325,7 @@ const ProviderService = {
         createdAt: new Date().toISOString()
       });
 
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('providers')
         .update({ booths, updated_at: new Date().toISOString() })
         .eq('id', uid);
@@ -339,7 +339,7 @@ const ProviderService = {
 
   async updateBooth(uid, boothId, boothData) {
     try {
-      const { data: provider } = await supabase
+      const { data: provider } = await supabaseClient
         .from('providers')
         .select('booths')
         .eq('id', uid)
@@ -367,7 +367,7 @@ const ProviderService = {
 
   async deleteBooth(uid, boothId) {
     try {
-      const { data: provider } = await supabase
+      const { data: provider } = await supabaseClient
         .from('providers')
         .select('booths')
         .eq('id', uid)
@@ -375,7 +375,7 @@ const ProviderService = {
 
       const booths = (provider?.booths || []).filter(b => b.id !== boothId);
 
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('providers')
         .update({ booths, updated_at: new Date().toISOString() })
         .eq('id', uid);
@@ -390,7 +390,7 @@ const ProviderService = {
   // Gestion des tarifs
   async updatePricing(uid, pricingData) {
     try {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('providers')
         .update({
           pricing_formulas: pricingData.formulas,
@@ -409,7 +409,7 @@ const ProviderService = {
   // Gestion de la galerie
   async updateGallery(uid, galleryUrls) {
     try {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('providers')
         .update({
           gallery: galleryUrls,
@@ -427,7 +427,7 @@ const ProviderService = {
   // Incrementer les stats
   async incrementStat(uid, statName) {
     try {
-      const { data: provider } = await supabase
+      const { data: provider } = await supabaseClient
         .from('providers')
         .select(statName)
         .eq('id', uid)
@@ -435,7 +435,7 @@ const ProviderService = {
 
       const currentValue = provider?.[statName] || 0;
 
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('providers')
         .update({ [statName]: currentValue + 1 })
         .eq('id', uid);
@@ -459,13 +459,13 @@ const StorageService = {
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `${uid}/${folder}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabaseClient.storage
         .from('provider-images')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = supabaseClient.storage
         .from('provider-images')
         .getPublicUrl(filePath);
 
@@ -485,7 +485,7 @@ const StorageService = {
 
       const filePath = urlParts[1];
 
-      const { error } = await supabase.storage
+      const { error } = await supabaseClient.storage
         .from('provider-images')
         .remove([filePath]);
 
@@ -502,7 +502,7 @@ const StorageService = {
     const result = await this.uploadImage(uid, file, 'logo');
 
     if (result.success) {
-      await supabase
+      await supabaseClient
         .from('providers')
         .update({ logo_url: result.url })
         .eq('id', uid);
