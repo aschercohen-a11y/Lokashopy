@@ -1586,17 +1586,28 @@
 }
 
 /* Lokashopy Reviews Section */
-.lokashopy-reviews {
-  margin-top: var(--spacing-6);
-  padding-top: var(--spacing-6);
-  border-top: 1px solid var(--color-gray-200);
+.lokashopy-reviews-section {
+  margin-bottom: var(--spacing-6);
 }
 
-.lokashopy-reviews h4 {
+.lokashopy-reviews-section h4 {
   margin-bottom: var(--spacing-4);
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-gray-800);
+}
+
+/* External review /5 indicator */
+.external-review-max {
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--color-gray-500);
+}
+
+/* Ensure stars are gold/yellow not red */
+.external-review-stars svg {
+  color: #f59e0b;
+  fill: #f59e0b;
 }
 
 /* Tab: Tarifs */

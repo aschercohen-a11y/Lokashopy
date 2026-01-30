@@ -1319,22 +1319,25 @@ const App = {
     const total = provider.reviews.length || 1;
 
     return `
-      <div class="reviews-header">
-        <div class="reviews-summary">
-          <div class="reviews-average">${provider.rating.toFixed(1)}</div>
-          <div class="reviews-stars">${Utils.generateStars(provider.rating, { size: 'lg' })}</div>
-          <div class="reviews-count">${provider.reviewCount} avis</div>
-        </div>
-        <div class="reviews-breakdown">
-          ${[5, 4, 3, 2, 1].map(n => `
-            <div class="reviews-bar">
-              <span class="reviews-bar-label">${n} ${Components.icons.star}</span>
-              <div class="reviews-bar-track">
-                <div class="reviews-bar-fill" style="width: ${(breakdown[n-1] / total) * 100}%;"></div>
+      <div class="lokashopy-reviews-section">
+        <h4>Avis sur Lokashopy :</h4>
+        <div class="reviews-header">
+          <div class="reviews-summary">
+            <div class="reviews-average">${provider.rating.toFixed(1)}</div>
+            <div class="reviews-stars">${Utils.generateStars(provider.rating, { size: 'lg' })}</div>
+            <div class="reviews-count">${provider.reviewCount} avis</div>
+          </div>
+          <div class="reviews-breakdown">
+            ${[5, 4, 3, 2, 1].map(n => `
+              <div class="reviews-bar">
+                <span class="reviews-bar-label">${n} ${Components.icons.star}</span>
+                <div class="reviews-bar-track">
+                  <div class="reviews-bar-fill" style="width: ${(breakdown[n-1] / total) * 100}%;"></div>
+                </div>
+                <span class="reviews-bar-count">${breakdown[n-1]}</span>
               </div>
-              <span class="reviews-bar-count">${breakdown[n-1]}</span>
-            </div>
-          `).join('')}
+            `).join('')}
+          </div>
         </div>
       </div>
 
@@ -1355,7 +1358,7 @@ const App = {
             </div>
             ${provider.googleRating ? `
             <div class="external-review-rating">
-              <span class="external-review-score">${provider.googleRating.toFixed(1)}</span>
+              <span class="external-review-score">${provider.googleRating.toFixed(1)}<span class="external-review-max">/5</span></span>
               <div class="external-review-stars">${Utils.generateStars(provider.googleRating)}</div>
             </div>
             <div class="external-review-count">${provider.googleReviewCount || 0} avis</div>
@@ -1374,7 +1377,7 @@ const App = {
             </div>
             ${provider.trustpilotRating ? `
             <div class="external-review-rating">
-              <span class="external-review-score">${provider.trustpilotRating.toFixed(1)}</span>
+              <span class="external-review-score">${provider.trustpilotRating.toFixed(1)}<span class="external-review-max">/5</span></span>
               <div class="external-review-stars">${Utils.generateStars(provider.trustpilotRating)}</div>
             </div>
             <div class="external-review-count">${provider.trustpilotReviewCount || 0} avis</div>
@@ -1387,14 +1390,11 @@ const App = {
       </div>
       ` : ''}
 
-      <div class="lokashopy-reviews">
-        <h4>Avis sur Lokashopy :</h4>
-        <div class="reviews-list">
-          ${provider.reviews.length > 0
-            ? provider.reviews.map(review => Components.renderReviewCard(review)).join('')
-            : '<p class="text-center text-gray">Aucun avis sur Lokashopy pour le moment</p>'
-          }
-        </div>
+      <div class="reviews-list">
+        ${provider.reviews.length > 0
+          ? provider.reviews.map(review => Components.renderReviewCard(review)).join('')
+          : '<p class="text-center text-gray">Aucun avis sur Lokashopy pour le moment</p>'
+        }
       </div>
     `;
   },
