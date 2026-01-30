@@ -480,7 +480,7 @@ const ProviderService = {
       if (index !== -1) {
         booths[index] = { ...booths[index], ...boothData };
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('providers')
           .update({ booths, updated_at: new Date().toISOString() })
           .eq('id', uid);
