@@ -100,6 +100,25 @@ ADD COLUMN IF NOT EXISTS trustpilot_review_count int4;
 - Boutons avec nom de chaque photobooth
 - Effet hover rose/blanc comme les onglets principaux
 
+### 7. Creation de CHECKLIST.md
+
+**Fichier cree :** Liste complete des taches du projet
+
+- 65 taches terminees
+- 72 taches restantes
+- Organisation par categorie (Auth, Dashboard, Chat, Notifications, Flutter, etc.)
+
+### 8. Discussion PWA vs Flutter
+
+**Contexte :** Pour le futur chat avec notifications push
+
+| Solution | Notifications iOS | Installation |
+|----------|-------------------|--------------|
+| PWA | Limitees (iOS 16.4+) | Manuelle |
+| Flutter | Parfaites | App Store / Play Store |
+
+**Decision :** Flutter sera utilise pour l'app mobile afin d'avoir des notifications push fiables sur iOS et Android.
+
 ---
 
 ## Architecture du projet
@@ -120,7 +139,8 @@ Lokashopy/
 │   ├── supabase-config.js  # Services Auth/Database/Storage
 │   └── app.js              # App principale (setupBoothSubtabs, cropper)
 ├── .gitignore
-└── CLAUDE.md               # Ce fichier
+├── CLAUDE.md               # Historique des sessions
+└── CHECKLIST.md            # Liste des taches (fait/a faire)
 ```
 
 ---
