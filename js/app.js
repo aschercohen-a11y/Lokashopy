@@ -755,6 +755,9 @@ const App = {
   },
 
   initSearchPageFeatures() {
+    // Lazy loading des images
+    Utils.lazyLoadImages();
+
     // Vue toggle
     const viewToggle = document.querySelector('.view-toggle');
     if (viewToggle) {
