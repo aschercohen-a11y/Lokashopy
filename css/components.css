@@ -978,8 +978,8 @@
 }
 
 .tab-btn:hover {
-  color: var(--color-primary);
-  background-color: var(--color-primary-light);
+  color: #fff;
+  background-color: var(--color-primary);
 }
 
 .tab-btn.active {
