@@ -88,6 +88,12 @@ const App = {
   updateHeader() {
     const headerContainer = document.querySelector('.header-container');
     if (headerContainer) {
+      // Ne pas re-rendre si une modal est ouverte (pour eviter de perdre les donnees du formulaire)
+      const openModal = document.querySelector('.modal.open');
+      if (openModal) {
+        return;
+      }
+
       const app = document.getElementById('app');
       const mainContent = document.getElementById('main-content').innerHTML;
 
