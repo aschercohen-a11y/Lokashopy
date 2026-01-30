@@ -2797,21 +2797,21 @@ const App = {
     const image = document.getElementById('lightbox-image');
     if (image && this.state.lightboxImages[this.state.lightboxIndex]) {
       if (direction) {
-        // Animation de slide
-        const slideOut = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
-        const slideIn = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+        // Animation 3D Flip
+        const flipOut = direction === 'next' ? 'flip-out-left' : 'flip-out-right';
+        const flipIn = direction === 'next' ? 'flip-in-right' : 'flip-in-left';
 
-        image.classList.add(slideOut);
+        image.classList.add(flipOut);
 
         setTimeout(() => {
           image.src = this.state.lightboxImages[this.state.lightboxIndex];
-          image.classList.remove(slideOut);
-          image.classList.add(slideIn);
+          image.classList.remove(flipOut);
+          image.classList.add(flipIn);
 
           setTimeout(() => {
-            image.classList.remove(slideIn);
-          }, 300);
-        }, 150);
+            image.classList.remove(flipIn);
+          }, 400);
+        }, 300);
       } else {
         image.src = this.state.lightboxImages[this.state.lightboxIndex];
       }
