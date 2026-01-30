@@ -966,23 +966,26 @@
 }
 
 .tab-btn {
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--text-sm);
+  padding: var(--spacing-3) var(--spacing-5);
+  font-size: var(--text-base);
   font-weight: var(--font-medium);
   color: var(--color-gray-500);
-  border-bottom: 2px solid transparent;
+  border-bottom: 3px solid transparent;
   margin-bottom: -2px;
   white-space: nowrap;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  transition: all 0.3s ease;
 }
 
 .tab-btn:hover {
-  color: var(--color-gray-700);
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
 }
 
 .tab-btn.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
+  background-color: transparent;
 }
 
 .tab-content {
