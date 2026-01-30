@@ -1345,11 +1345,30 @@ const Components = {
               }
             </div>
             <input type="file" id="booth-image-input" accept="image/*" style="display: none;">
-            <button type="button" class="btn btn-ghost btn-sm" id="booth-image-btn">
-              ${this.icons.camera} ${currentImage ? 'Changer la photo' : 'Choisir une photo'}
-            </button>
+            <div class="booth-image-actions">
+              <button type="button" class="btn btn-ghost btn-sm" id="booth-image-btn">
+                ${this.icons.camera} ${currentImage ? 'Changer la photo' : 'Choisir une photo'}
+              </button>
+            </div>
           </div>
           <input type="hidden" name="imageUrl" id="booth-image-url" value="${currentImage}">
+
+          <!-- Modal de recadrage -->
+          <div id="crop-modal" class="crop-modal" style="display: none;">
+            <div class="crop-modal-content">
+              <div class="crop-modal-header">
+                <h3>Recadrer l'image</h3>
+                <button type="button" class="modal-close" id="crop-cancel">&times;</button>
+              </div>
+              <div class="crop-container">
+                <img id="crop-image" src="" alt="Image a recadrer">
+              </div>
+              <div class="crop-actions">
+                <button type="button" class="btn btn-ghost" id="crop-cancel-btn">Annuler</button>
+                <button type="button" class="btn btn-primary" id="crop-confirm">Valider le recadrage</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">

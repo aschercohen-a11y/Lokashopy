@@ -2415,30 +2415,93 @@ const App = {
       };
     }
 
+    // Variables pour le cropper
+    let cropper = null;
+
     imageInput?.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      // Preview
+      // Ouvrir le modal de recadrage
+      const cropModal = document.getElementById('crop-modal');
+      const cropImage = document.getElementById('crop-image');
+
       const reader = new FileReader();
-      reader.onload = (e) => {
-        imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+      reader.onload = (event) => {
+        cropImage.src = event.target.result;
+        cropModal.style.display = 'flex';
+
+        // Initialiser Cropper.js
+        if (cropper) {
+          cropper.destroy();
+        }
+        cropper = new Cropper(cropImage, {
+          aspectRatio: 4 / 3,
+          viewMode: 2,
+          autoCropArea: 1,
+          responsive: true,
+          guides: true,
+          center: true,
+          highlight: true,
+          background: true,
+        });
       };
       reader.readAsDataURL(file);
+    });
 
-      // Upload to Supabase
-      imageBtn.disabled = true;
-      imageBtn.innerHTML = '<span class="loader loader-sm"></span> Upload...';
+    // Boutons du modal de recadrage
+    const cropCancel = document.getElementById('crop-cancel');
+    const cropCancelBtn = document.getElementById('crop-cancel-btn');
+    const cropConfirm = document.getElementById('crop-confirm');
+    const cropModal = document.getElementById('crop-modal');
 
-      const result = await StorageService.uploadBoothImage(this.state.currentUser.id, file);
-      if (result.success) {
-        imageUrlInput.value = result.url;
-        imageBtn.innerHTML = `${Components.icons.camera} Photo ajoutee`;
-      } else {
-        Components.showToast({ type: 'error', message: 'Erreur upload image' });
-        imageBtn.innerHTML = `${Components.icons.camera} Reessayer`;
+    const closeCropModal = () => {
+      if (cropModal) cropModal.style.display = 'none';
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
       }
-      imageBtn.disabled = false;
+      imageInput.value = '';
+    };
+
+    cropCancel?.addEventListener('click', closeCropModal);
+    cropCancelBtn?.addEventListener('click', closeCropModal);
+
+    cropConfirm?.addEventListener('click', async () => {
+      if (!cropper) return;
+
+      // Obtenir l'image recadree
+      const canvas = cropper.getCroppedCanvas({
+        width: 800,
+        height: 600,
+        imageSmoothingQuality: 'high'
+      });
+
+      // Convertir en blob
+      canvas.toBlob(async (blob) => {
+        // Afficher le preview
+        const previewUrl = URL.createObjectURL(blob);
+        imagePreview.innerHTML = `<img src="${previewUrl}" alt="Preview">`;
+
+        // Fermer le modal
+        closeCropModal();
+
+        // Upload to Supabase
+        imageBtn.disabled = true;
+        imageBtn.innerHTML = '<span class="loader loader-sm"></span> Upload...';
+
+        const file = new File([blob], 'booth-image.jpg', { type: 'image/jpeg' });
+        const result = await StorageService.uploadBoothImage(this.state.currentUser.id, file);
+
+        if (result.success) {
+          imageUrlInput.value = result.url;
+          imageBtn.innerHTML = `${Components.icons.camera} Photo ajoutee`;
+        } else {
+          Components.showToast({ type: 'error', message: 'Erreur upload image' });
+          imageBtn.innerHTML = `${Components.icons.camera} Reessayer`;
+        }
+        imageBtn.disabled = false;
+      }, 'image/jpeg', 0.9);
     });
 
     // Gestion du champ de quantite pour l'option Impression
