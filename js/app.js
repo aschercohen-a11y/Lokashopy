@@ -638,15 +638,16 @@ const App = {
   // PAGE DE RECHERCHE
   // ----------------------------------------
   async renderSearchPage(filters = {}) {
-    const main = document.getElementById('main-content');
-
     // Afficher un loader pendant le chargement
-    main.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: center; min-height: 400px; flex-direction: column; gap: 16px;">
-        <div class="loader"></div>
-        <p style="color: #6B7280;">Chargement des prestataires...</p>
-      </div>
-    `;
+    const loaderMain = document.getElementById('main-content');
+    if (loaderMain) {
+      loaderMain.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 400px; flex-direction: column; gap: 16px;">
+          <div class="loader"></div>
+          <p style="color: #6B7280;">Chargement des prestataires...</p>
+        </div>
+      `;
+    }
 
     // Charger les vrais prestataires depuis Supabase
     if (typeof ProviderService !== 'undefined') {
@@ -655,6 +656,10 @@ const App = {
         this.state.loadedProviders = result.data;
       }
     }
+
+    // Récupérer main APRÈS la requête async (le DOM peut avoir changé)
+    const main = document.getElementById('main-content');
+    if (!main) return;
 
     // Filtrer et trier les prestataires
     let providers = Utils.filterProviders(this.state.loadedProviders, filters);
