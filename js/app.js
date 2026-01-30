@@ -2276,6 +2276,41 @@ const App = {
 
     if (!saveBtn || !form) return;
 
+    // Setup image upload
+    const imageInput = document.getElementById('booth-image-input');
+    const imageBtn = document.getElementById('booth-image-btn');
+    const imagePreview = document.getElementById('booth-image-preview');
+    const imageUrlInput = document.getElementById('booth-image-url');
+
+    imageBtn?.addEventListener('click', () => imageInput?.click());
+    imagePreview?.addEventListener('click', () => imageInput?.click());
+
+    imageInput?.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to Supabase
+      imageBtn.disabled = true;
+      imageBtn.innerHTML = '<span class="loader loader-sm"></span> Upload...';
+
+      const result = await StorageService.uploadBoothImage(this.state.currentUser.id, file);
+      if (result.success) {
+        imageUrlInput.value = result.url;
+        imageBtn.innerHTML = `${Components.icons.camera} Photo ajoutee`;
+      } else {
+        Components.showToast({ type: 'error', message: 'Erreur upload image' });
+        imageBtn.innerHTML = `${Components.icons.camera} Reessayer`;
+      }
+      imageBtn.disabled = false;
+    });
+
     // Remove old listener
     const newSaveBtn = saveBtn.cloneNode(true);
     saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
@@ -2288,6 +2323,7 @@ const App = {
 
       const formData = new FormData(form);
       const boothId = formData.get('boothId');
+      const imageUrl = formData.get('imageUrl');
 
       newSaveBtn.disabled = true;
       newSaveBtn.innerHTML = '<span class="loader loader-sm"></span> Enregistrement...';
@@ -2299,7 +2335,7 @@ const App = {
         description: formData.get('description'),
         specs: formData.get('specs').split('\n').filter(s => s.trim()),
         options: formData.getAll('options'),
-        images: []
+        images: imageUrl ? [imageUrl] : []
       };
 
       let result;

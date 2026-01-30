@@ -750,6 +750,56 @@
   font-size: var(--text-base);
 }
 
+/* Booth Image Upload */
+.booth-image-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.booth-image-preview {
+  width: 200px;
+  height: 150px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 2px dashed var(--color-gray-300);
+}
+
+.booth-image-preview:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.booth-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.booth-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-gray-400);
+}
+
+.booth-image-placeholder svg {
+  width: 32px;
+  height: 32px;
+}
+
+.booth-image-placeholder span {
+  font-size: var(--text-sm);
+}
+
 /* Review Card */
 .review-card {
   padding: var(--spacing-5);

@@ -638,6 +638,11 @@ const StorageService = {
     }
 
     return result;
+  },
+
+  // Upload une image de booth
+  async uploadBoothImage(uid, file) {
+    return await this.uploadImage(uid, file, 'booths');
   }
 };
 

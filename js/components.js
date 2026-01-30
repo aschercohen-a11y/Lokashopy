@@ -1276,8 +1276,26 @@ const Components = {
 
   renderBoothModal(booth = null) {
     const isEdit = booth !== null;
+    const currentImage = booth?.images?.[0] || '';
     const content = `
       <form id="booth-form" class="booth-form">
+        <div class="form-group">
+          <label class="form-label">Photo du photobooth</label>
+          <div class="booth-image-upload">
+            <div class="booth-image-preview" id="booth-image-preview">
+              ${currentImage
+                ? `<img src="${currentImage}" alt="Preview">`
+                : `<div class="booth-image-placeholder">${this.icons.camera}<span>Ajouter une photo</span></div>`
+              }
+            </div>
+            <input type="file" id="booth-image-input" accept="image/*" style="display: none;">
+            <button type="button" class="btn btn-ghost btn-sm" id="booth-image-btn">
+              ${this.icons.camera} ${currentImage ? 'Changer la photo' : 'Choisir une photo'}
+            </button>
+          </div>
+          <input type="hidden" name="imageUrl" id="booth-image-url" value="${currentImage}">
+        </div>
+
         <div class="form-group">
           <label class="form-label required">Nom du photobooth</label>
           <input type="text" class="form-input" name="name" value="${booth?.name || ''}" required placeholder="Ex: Miroir Magique Premium">
