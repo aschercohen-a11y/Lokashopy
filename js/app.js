@@ -2761,12 +2761,12 @@ const App = {
 
     prevBtn?.addEventListener('click', () => {
       this.state.lightboxIndex = (this.state.lightboxIndex - 1 + this.state.lightboxImages.length) % this.state.lightboxImages.length;
-      this.updateLightboxImage();
+      this.updateLightboxImage('prev');
     });
 
     nextBtn?.addEventListener('click', () => {
       this.state.lightboxIndex = (this.state.lightboxIndex + 1) % this.state.lightboxImages.length;
-      this.updateLightboxImage();
+      this.updateLightboxImage('next');
     });
 
     // Keyboard navigation
@@ -2775,10 +2775,10 @@ const App = {
 
       if (e.key === 'ArrowLeft') {
         this.state.lightboxIndex = (this.state.lightboxIndex - 1 + this.state.lightboxImages.length) % this.state.lightboxImages.length;
-        this.updateLightboxImage();
+        this.updateLightboxImage('prev');
       } else if (e.key === 'ArrowRight') {
         this.state.lightboxIndex = (this.state.lightboxIndex + 1) % this.state.lightboxImages.length;
-        this.updateLightboxImage();
+        this.updateLightboxImage('next');
       }
     });
   },
@@ -2793,10 +2793,28 @@ const App = {
     }
   },
 
-  updateLightboxImage() {
+  updateLightboxImage(direction = null) {
     const image = document.getElementById('lightbox-image');
     if (image && this.state.lightboxImages[this.state.lightboxIndex]) {
-      image.src = this.state.lightboxImages[this.state.lightboxIndex];
+      if (direction) {
+        // Animation de slide
+        const slideOut = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
+        const slideIn = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+
+        image.classList.add(slideOut);
+
+        setTimeout(() => {
+          image.src = this.state.lightboxImages[this.state.lightboxIndex];
+          image.classList.remove(slideOut);
+          image.classList.add(slideIn);
+
+          setTimeout(() => {
+            image.classList.remove(slideIn);
+          }, 300);
+        }, 150);
+      } else {
+        image.src = this.state.lightboxImages[this.state.lightboxIndex];
+      }
     }
   },
 
