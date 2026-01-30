@@ -299,6 +299,17 @@ const ProviderService = {
       verified: data.verified || false,
       rating: 5.0,
       reviewCount: 0,
+      reviews: [],
+      radius: 50,
+      hours: {
+        'Lundi': '9h - 18h',
+        'Mardi': '9h - 18h',
+        'Mercredi': '9h - 18h',
+        'Jeudi': '9h - 18h',
+        'Vendredi': '9h - 18h',
+        'Samedi': 'Sur RDV',
+        'Dimanche': 'Ferme'
+      },
       stats: {
         views: data.views || 0,
         quotes: data.quotes || 0,
