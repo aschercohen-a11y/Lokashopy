@@ -2229,23 +2229,35 @@ const App = {
         const boothId = btn.dataset.boothId;
         const booth = this.state.userProvider.booths.find(b => b.id === boothId);
         if (booth) {
-          // Update modal content with booth data
-          const form = document.getElementById('booth-form');
-          if (form) {
-            form.querySelector('[name="name"]').value = booth.name || '';
-            form.querySelector('[name="type"]').value = booth.type || '';
-            form.querySelector('[name="priceFrom"]').value = booth.priceFrom || '';
-            form.querySelector('[name="description"]').value = booth.description || '';
-            form.querySelector('[name="specs"]').value = booth.specs?.join('\n') || '';
-            form.querySelector('[name="boothId"]').value = booth.id;
-
-            // Check options
-            form.querySelectorAll('[name="options"]').forEach(cb => {
-              cb.checked = booth.options?.includes(cb.value) || false;
-            });
-          }
+          // Ouvrir la modal d'abord
           this.openModal('booth-modal');
-          this.setupBoothForm();
+
+          // Attendre que la modal soit visible puis remplir le formulaire
+          setTimeout(() => {
+            const form = document.getElementById('booth-form');
+            if (form) {
+              form.querySelector('[name="name"]').value = booth.name || '';
+              form.querySelector('[name="type"]').value = booth.type || '';
+              form.querySelector('[name="priceFrom"]').value = booth.priceFrom || '';
+              form.querySelector('[name="description"]').value = booth.description || '';
+              form.querySelector('[name="specs"]').value = booth.specs?.join('\n') || '';
+              form.querySelector('[name="boothId"]').value = booth.id;
+
+              // Check options
+              form.querySelectorAll('[name="options"]').forEach(cb => {
+                cb.checked = booth.options?.includes(cb.value) || false;
+              });
+
+              // Remplir l'image si elle existe
+              const imagePreview = document.getElementById('booth-image-preview');
+              const imageUrlInput = document.getElementById('booth-image-url');
+              if (booth.images && booth.images[0]) {
+                imagePreview.innerHTML = `<img src="${booth.images[0]}" alt="Preview">`;
+                imageUrlInput.value = booth.images[0];
+              }
+            }
+            this.setupBoothForm();
+          }, 100);
         }
       });
     });
@@ -2282,8 +2294,23 @@ const App = {
     const imagePreview = document.getElementById('booth-image-preview');
     const imageUrlInput = document.getElementById('booth-image-url');
 
-    imageBtn?.addEventListener('click', () => imageInput?.click());
-    imagePreview?.addEventListener('click', () => imageInput?.click());
+    console.log('Setting up booth form - imageBtn:', !!imageBtn, 'imageInput:', !!imageInput);
+
+    if (imageBtn && imageInput) {
+      imageBtn.onclick = (e) => {
+        e.preventDefault();
+        console.log('Image button clicked');
+        imageInput.click();
+      };
+    }
+
+    if (imagePreview && imageInput) {
+      imagePreview.onclick = (e) => {
+        e.preventDefault();
+        console.log('Preview clicked');
+        imageInput.click();
+      };
+    }
 
     imageInput?.addEventListener('change', async (e) => {
       const file = e.target.files[0];
