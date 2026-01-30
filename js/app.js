@@ -592,12 +592,14 @@ const App = {
   },
 
   async loadFeaturedProviders() {
-    const container = document.getElementById('featured-providers-container');
-    if (!container) return;
-
     if (typeof ProviderService !== 'undefined') {
       try {
         const result = await ProviderService.getAllProviders();
+
+        // Récupérer le container APRÈS la requête async (le DOM peut avoir changé)
+        const container = document.getElementById('featured-providers-container');
+        if (!container) return;
+
         if (result.success && result.data.length > 0) {
           const providers = result.data.slice(0, 5);
 
@@ -611,7 +613,7 @@ const App = {
 
           // Initialiser le lazy loading pour les nouvelles images
           Utils.lazyLoadImages();
-        } else {
+        } else if (container) {
           container.innerHTML = `
             <div class="text-center" style="padding: 40px 20px;">
               <p style="color: var(--color-gray-500);">Aucun prestataire pour le moment. Soyez le premier !</p>
@@ -620,11 +622,14 @@ const App = {
         }
       } catch (error) {
         console.error('Error loading providers:', error);
-        container.innerHTML = `
-          <div class="text-center" style="padding: 40px 20px;">
-            <p style="color: var(--color-gray-500);">Erreur de chargement</p>
-          </div>
-        `;
+        const errorContainer = document.getElementById('featured-providers-container');
+        if (errorContainer) {
+          errorContainer.innerHTML = `
+            <div class="text-center" style="padding: 40px 20px;">
+              <p style="color: var(--color-gray-500);">Erreur de chargement</p>
+            </div>
+          `;
+        }
       }
     }
   },
