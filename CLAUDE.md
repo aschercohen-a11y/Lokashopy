@@ -1,6 +1,6 @@
 # Historique de Session Claude - Lokashopy
 
-## Date : 29 Janvier 2026
+## Date : 30 Janvier 2026
 
 ---
 
@@ -14,74 +14,91 @@ Plateforme de mise en relation pour la location de photobooths en France.
 
 ---
 
-## Sessions precedentes (28 Janvier 2026)
+## Sessions precedentes (28-29 Janvier 2026)
 
-### 1. Correction des images sur la page recherche
-- Ajout de `Utils.lazyLoadImages()` dans `navigate()` pour le lazy loading apres navigation SPA
+### 28 Janvier 2026
+- Correction des images sur la page recherche (lazy loading)
+- Deploiement sur Vercel
+- Renommage BoothFinder -> Lokashopy
 
-### 2. Deploiement sur Vercel
-- Initialisation Git, creation .gitignore
-- Push vers GitHub : `https://github.com/aschercohen-a11y/Lokashopy.git`
-- Deploiement automatique sur Vercel
-
-### 3. Renommage BoothFinder -> Lokashopy
-- Mise a jour de tous les fichiers avec le nouveau nom
+### 29 Janvier 2026
+- Integration complete de Supabase (Auth, Database, Storage)
+- Correction de nombreux bugs (voir historique complet plus bas)
+- Suppression des faux prestataires
+- Header simplifie pour le dashboard
 
 ---
 
-## Session actuelle (29 Janvier 2026)
+## Session actuelle (30 Janvier 2026)
 
-### 1. Integration complete de Supabase
+### 1. Champ "Rayon d'intervention"
 
-**Nouveau fichier cree : `js/supabase-config.js`**
+**Fonctionnalite :** Permettre aux prestataires d'indiquer leur zone d'intervention
 
-Contient 3 services :
-- **AuthService** : Inscription, connexion, deconnexion, gestion session
-- **ProviderService** : CRUD des prestataires, upload images
-- **StorageService** : Gestion des fichiers dans Supabase Storage
+- Ajout du champ `radius` dans le profil dashboard
+- Option de laisser vide pour masquer l'information
+- Affichage conditionnel sur la page publique
 
-**Configuration Supabase :**
-```javascript
-const SUPABASE_URL = 'https://cagygpiweqejbiofknxl.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_xhEh9oudRscxqKTJ5zfgKA_4VF1RXgv';
+**Colonnes Supabase ajoutees :**
+```sql
+ALTER TABLE providers ADD COLUMN IF NOT EXISTS radius int4;
 ```
 
-### 2. Bugs corriges durant cette session
+### 2. Liens vers avis externes (Google & Trustpilot)
 
-| Bug | Cause | Solution |
-|-----|-------|----------|
-| `Identifier 'supabase' already declared` | Conflit avec le SDK global | Renomme en `supabaseClient` |
-| Inscription qui mouline indefiniment | Email confirmation active | Desactive "Confirm email" dans Supabase |
-| Formulaire profil 404 | Soumission GET au lieu de JS | Event delegation pour `profile-form` |
-| `Cannot read 'slice' of undefined` sur boothTypes | Donnees manquantes | Ajout `boothTypes`, `priceFrom`, `cover` dans `transformToPublicFormat()` |
-| Page d'accueil blanche | `renderHomePage()` async non await | Rendu sync + chargement async via `loadFeaturedProviders()` |
-| "Erreur de chargement" sur home | Policies RLS manquantes | Recreation des policies SELECT public |
-| Formules tarifs non sauvegardees | Event delegation interceptait `pricing-form` | Retire du handler global |
-| Menu utilisateur non cliquable | Event delegation ne fonctionnait pas | Ajout `onclick` inline sur le bouton |
-| Bouton deconnexion inactif | Meme probleme | Ajout `onclick="App.handleLogout();"` inline |
+**Fonctionnalite :** Afficher les avis Google My Business et Trustpilot
 
-### 3. Suppression des faux prestataires
+- Champs URL pour Google et Trustpilot dans le dashboard
+- Champs manuels pour note (ex: 4.8/5) et nombre d'avis
+- Affichage en cartes cliquables sur l'onglet "Avis"
+- Etoiles jaunes et indication "/5"
 
-**Modifications :**
-- Page recherche : charge depuis Supabase au lieu de `DATA.PROVIDERS`
-- Page accueil : charge les prestataires "featured" depuis Supabase
-- Ajout de `state.loadedProviders` pour tracker les donnees
-- Nouvelles fonctions : `getAllProviders()`, `getProviderBySlug()`
+**Colonnes Supabase a ajouter :**
+```sql
+ALTER TABLE providers
+ADD COLUMN IF NOT EXISTS google_reviews_url text,
+ADD COLUMN IF NOT EXISTS trustpilot_url text,
+ADD COLUMN IF NOT EXISTS google_rating decimal(2,1),
+ADD COLUMN IF NOT EXISTS google_review_count int4,
+ADD COLUMN IF NOT EXISTS trustpilot_rating decimal(2,1),
+ADD COLUMN IF NOT EXISTS trustpilot_review_count int4;
+```
 
-### 4. Header simplifie pour le dashboard
+### 3. Reorganisation de l'onglet Avis
 
-**Demande :** Quand on est dans le dashboard, ne pas afficher "Accueil", "Rechercher", "Tableau de bord"
+- Titre "Avis sur Lokashopy" au-dessus de la note 5.0
+- Section "Nos avis exterieurs" pour Google/Trustpilot
+- Suppression du "(0)" dans l'onglet "Avis"
 
-**Solution :**
-- Parametre `isDashboard` ajoute a `renderHeader()`
-- Detection automatique dans `renderLayout()` et `navigate()`
-- Header simplifie : logo + menu utilisateur uniquement
-- Footer masque sur le dashboard
+### 4. Amelioration des onglets (tabs)
 
-**Fichiers modifies :**
-- `js/components.js` : nouveau rendu header pour dashboard
-- `js/app.js` : detection transition vers/depuis dashboard
-- `css/components.css` : styles `.header-dashboard`
+- Taille augmentee (font + padding)
+- Effet hover en fondu : fond rose + texte blanc
+- Transition 0.3s ease
+
+### 5. Recadrage d'image pour photobooths
+
+**Librairie ajoutee :** Cropper.js
+
+- Modal de recadrage lors de l'ajout de photo
+- Ratio 4:3 pour les images de photobooth
+- Zoom, deplacement, recadrage avant upload
+- Export en JPEG qualite 0.9
+
+**CDN ajoutes dans index.html :**
+```html
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+```
+
+### 6. Sous-onglets pour photobooths
+
+**Fonctionnalite :** Navigation entre plusieurs photobooths
+
+- Si 1 seul photobooth : affichage direct sans sous-onglets
+- Si plusieurs : titre "Nos choix de photobooth" + sous-onglets
+- Boutons avec nom de chaque photobooth
+- Effet hover rose/blanc comme les onglets principaux
 
 ---
 
@@ -89,19 +106,19 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xhEh9oudRscxqKTJ5zfgKA_4VF1RXgv';
 
 ```
 Lokashopy/
-├── index.html              # Point d'entree HTML
+├── index.html              # Point d'entree HTML + CDN Cropper.js
 ├── css/
 │   ├── variables.css       # Variables CSS (couleurs, espacements)
 │   ├── base.css            # Styles de base, reset
-│   ├── components.css      # Composants reutilisables
-│   ├── pages.css           # Styles specifiques aux pages
+│   ├── components.css      # Composants (modal, tabs, crop-modal)
+│   ├── pages.css           # Styles pages (booths-subtabs, external-reviews)
 │   └── responsive.css      # Media queries
 ├── js/
-│   ├── data.js             # Donnees mock (plus utilise pour les vrais prestataires)
+│   ├── data.js             # Donnees mock + OPTIONS
 │   ├── utils.js            # Fonctions utilitaires
-│   ├── components.js       # Composants HTML (header, footer, cards, dashboard)
-│   ├── supabase-config.js  # Configuration Supabase + services Auth/Database/Storage
-│   └── app.js              # Application principale, routing SPA, auth state
+│   ├── components.js       # Composants HTML (renderBoothModal avec crop)
+│   ├── supabase-config.js  # Services Auth/Database/Storage
+│   └── app.js              # App principale (setupBoothSubtabs, cropper)
 ├── .gitignore
 └── CLAUDE.md               # Ce fichier
 ```
@@ -112,6 +129,7 @@ Lokashopy/
 
 - **Frontend :** HTML5, CSS3, JavaScript (Vanilla)
 - **Backend :** Supabase (Authentication, PostgreSQL, Storage)
+- **Librairies :** Cropper.js (recadrage images)
 - **Routing :** SPA avec History API
 - **Hebergement :** Vercel (gratuit)
 - **Repository :** GitHub
@@ -121,7 +139,7 @@ Lokashopy/
 
 ## Fonctionnalites implementees
 
-- Page d'accueil avec recherche et prestataires vedettes (depuis Supabase)
+- Page d'accueil avec recherche et prestataires vedettes
 - Page de recherche avec filtres (type, budget, options, note)
 - Pages profil prestataire avec galerie, avis, equipements
 - Design responsive (mobile, tablet, desktop)
@@ -130,39 +148,19 @@ Lokashopy/
 - **Dashboard prestataire complet :**
   - Vue d'ensemble avec statistiques
   - Gestion du profil (infos, logo, contact, reseaux sociaux)
-  - Gestion des photobooths (ajout, modification, suppression)
-  - Gestion des tarifs (formules et options supplementaires)
+  - Champs experience, evenements/an, rayon d'intervention
+  - Liens Google Reviews et Trustpilot avec notes manuelles
+  - Gestion des photobooths avec recadrage d'image
+  - Gestion des tarifs (formules et options)
   - Galerie photos (upload, suppression)
-  - Header simplifie sans navigation superflue
-
----
-
-## Commandes utiles
-
-### Modifier et deployer
-```bash
-cd "C:\Users\asche\Downloads\claude\Comparateur"
-git add -A
-git commit -m "Description des changements"
-git push
-```
-Vercel deploie automatiquement en ~30 secondes.
-
-### Lancer en local
-```bash
-npx serve -p 8000
-```
-Puis ouvrir http://localhost:8000/
+- **Page prestataire publique :**
+  - Onglets avec effet hover
+  - Sous-onglets pour photobooths multiples
+  - Avis Lokashopy + avis externes (Google/Trustpilot)
 
 ---
 
 ## Configuration Supabase
-
-### Informations du projet actuel
-
-- **URL :** `https://cagygpiweqejbiofknxl.supabase.co`
-- **Table principale :** `providers`
-- **Bucket Storage :** `provider-images`
 
 ### Structure de la table providers
 
@@ -177,6 +175,15 @@ Puis ouvrir http://localhost:8000/
 | email, phone | text | Contact |
 | city, department, address, postal_code | text | Localisation |
 | website, instagram, facebook | text | Liens |
+| experience | int4 | Annees d'experience |
+| events_per_year | int4 | Nombre d'evenements par an |
+| radius | int4 | Rayon d'intervention (km) |
+| google_reviews_url | text | Lien Google My Business |
+| google_rating | decimal(2,1) | Note Google (ex: 4.8) |
+| google_review_count | int4 | Nombre d'avis Google |
+| trustpilot_url | text | Lien Trustpilot |
+| trustpilot_rating | decimal(2,1) | Note Trustpilot |
+| trustpilot_review_count | int4 | Nombre d'avis Trustpilot |
 | booths | jsonb | Liste des photobooths |
 | pricing_formulas | jsonb | Formules tarifaires |
 | pricing_extras | jsonb | Options supplementaires |
@@ -198,6 +205,37 @@ Puis ouvrir http://localhost:8000/
 
 ---
 
+## Commandes utiles
+
+### Modifier et deployer
+```bash
+cd "C:\Users\asche\Downloads\claude\Comparateur"
+git add -A
+git commit -m "Description des changements"
+git push
+```
+Vercel deploie automatiquement en ~30 secondes.
+
+### Lancer en local
+```bash
+npx serve -p 8000
+```
+Puis ouvrir http://localhost:8000/
+
+### SQL pour nouvelles colonnes
+```sql
+ALTER TABLE providers
+ADD COLUMN IF NOT EXISTS radius int4,
+ADD COLUMN IF NOT EXISTS google_reviews_url text,
+ADD COLUMN IF NOT EXISTS trustpilot_url text,
+ADD COLUMN IF NOT EXISTS google_rating decimal(2,1),
+ADD COLUMN IF NOT EXISTS google_review_count int4,
+ADD COLUMN IF NOT EXISTS trustpilot_rating decimal(2,1),
+ADD COLUMN IF NOT EXISTS trustpilot_review_count int4;
+```
+
+---
+
 ## Prestataire de test
 
 **Nom :** ShootnBox
@@ -211,9 +249,10 @@ Puis ouvrir http://localhost:8000/
 - [ ] Ajouter un domaine personnalise (ex: lokashopy.fr)
 - [ ] Systeme de messagerie entre clients et prestataires
 - [ ] Paiement en ligne pour les reservations
-- [ ] Systeme de notation/avis par les clients
+- [ ] Systeme de notation/avis par les clients sur Lokashopy
 - [ ] Notifications par email (nouvelles demandes de devis)
 - [ ] Page "Mes favoris" pour les clients
+- [ ] Scraping automatique des notes Google (API payante)
 
 ---
 
@@ -222,8 +261,8 @@ Puis ouvrir http://localhost:8000/
 - Le plan Vercel gratuit suffit pour commencer
 - Le plan Supabase gratuit inclut : 500MB database, 1GB storage, 50K auth users
 - Pour usage commercial, prevoir Supabase Pro (25$/mois) + Vercel Pro (20$/mois)
-- Les images placeholder (`placehold.co`) sont remplacees au fur et a mesure par les vraies photos
+- Cropper.js est charge via CDN (pas d'installation npm necessaire)
 
 ---
 
-*Session Claude Code avec Claude Opus 4.5*
+*Session Claude Code avec Claude Opus 4.5 - 30 Janvier 2026*
