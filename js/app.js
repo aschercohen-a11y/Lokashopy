@@ -2123,7 +2123,9 @@ const App = {
       // Update profile
       await ProviderService.updateProfile(uid, {
         name: formData.get('name'),
-        description: formData.get('description')
+        description: formData.get('description'),
+        experience: formData.get('experience') ? parseInt(formData.get('experience')) : null,
+        eventsPerYear: formData.get('eventsPerYear') ? parseInt(formData.get('eventsPerYear')) : null
       });
 
       // Update location
@@ -2182,7 +2184,9 @@ const App = {
       // Update profile
       await ProviderService.updateProfile(uid, {
         name: formData.get('name'),
-        description: formData.get('description')
+        description: formData.get('description'),
+        experience: formData.get('experience') ? parseInt(formData.get('experience')) : null,
+        eventsPerYear: formData.get('eventsPerYear') ? parseInt(formData.get('eventsPerYear')) : null
       });
 
       // Update location

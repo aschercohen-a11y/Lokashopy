@@ -1156,6 +1156,17 @@ const Components = {
             <textarea class="form-input form-textarea" name="description" rows="5" required placeholder="Presentez votre entreprise, vos services...">${profile.description || ''}</textarea>
             <p class="form-hint">Minimum 100 caracteres pour un meilleur referencement</p>
           </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Annees d'experience</label>
+              <input type="number" class="form-input" name="experience" value="${profile.experience || ''}" min="0" placeholder="Ex: 5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Evenements par an</label>
+              <input type="number" class="form-input" name="eventsPerYear" value="${profile.eventsPerYear || ''}" min="0" placeholder="Ex: 100">
+            </div>
+          </div>
         </div>
 
         <div class="form-section">
