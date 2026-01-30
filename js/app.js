@@ -2246,7 +2246,18 @@ const App = {
               // Check options
               form.querySelectorAll('[name="options"]').forEach(cb => {
                 cb.checked = booth.options?.includes(cb.value) || false;
+                // Afficher le champ de quantite si l'option est cochee et a une quantite
+                if (cb.dataset.hasQuantity === 'true' && cb.checked) {
+                  const quantityDiv = document.getElementById(`quantity-${cb.value}`);
+                  if (quantityDiv) quantityDiv.classList.add('visible');
+                }
               });
+
+              // Remplir la quantite si elle existe
+              if (booth.printQuantity) {
+                const qtyInput = form.querySelector('[name="printQuantity"]');
+                if (qtyInput) qtyInput.value = booth.printQuantity;
+              }
 
               // Remplir l'image si elle existe
               const imagePreview = document.getElementById('booth-image-preview');
@@ -2338,6 +2349,21 @@ const App = {
       imageBtn.disabled = false;
     });
 
+    // Gestion du champ de quantite pour l'option Impression
+    const quantityCheckboxes = form.querySelectorAll('input[data-has-quantity="true"]');
+    quantityCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const quantityDiv = document.getElementById(`quantity-${checkbox.value}`);
+        if (quantityDiv) {
+          if (e.target.checked) {
+            quantityDiv.classList.add('visible');
+          } else {
+            quantityDiv.classList.remove('visible');
+          }
+        }
+      });
+    });
+
     // Remove old listener
     const newSaveBtn = saveBtn.cloneNode(true);
     saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
@@ -2355,6 +2381,7 @@ const App = {
       newSaveBtn.disabled = true;
       newSaveBtn.innerHTML = '<span class="loader loader-sm"></span> Enregistrement...';
 
+      const printQty = formData.get('printQuantity');
       const boothData = {
         name: formData.get('name'),
         type: formData.get('type'),
@@ -2362,6 +2389,7 @@ const App = {
         description: formData.get('description'),
         specs: formData.get('specs').split('\n').filter(s => s.trim()),
         options: formData.getAll('options'),
+        printQuantity: printQty ? parseInt(printQty) : null,
         images: imageUrl ? [imageUrl] : []
       };
 

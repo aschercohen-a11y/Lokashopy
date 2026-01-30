@@ -1331,12 +1331,31 @@ const Components = {
         <div class="form-group">
           <label class="form-label">Options incluses</label>
           <div class="checkbox-group">
-            ${DATA.OPTIONS.map(option => `
-              <label class="form-checkbox">
-                <input type="checkbox" name="options" value="${option.id}" ${booth?.options?.includes(option.id) ? 'checked' : ''}>
-                <span>${option.name}</span>
-              </label>
-            `).join('')}
+            ${DATA.OPTIONS.map(option => {
+              const isChecked = booth?.options?.includes(option.id);
+              const printQty = booth?.printQuantity || '';
+
+              if (option.hasQuantity) {
+                return `
+                  <div class="option-with-quantity">
+                    <label class="form-checkbox">
+                      <input type="checkbox" name="options" value="${option.id}" ${isChecked ? 'checked' : ''} data-has-quantity="true">
+                      <span>${option.name}</span>
+                    </label>
+                    <div class="option-quantity ${isChecked ? 'visible' : ''}" id="quantity-${option.id}">
+                      <input type="number" name="printQuantity" class="form-input form-input-sm"
+                        value="${printQty}" min="1" placeholder="Nb tirages" style="width: 100px;">
+                    </div>
+                  </div>
+                `;
+              }
+              return `
+                <label class="form-checkbox">
+                  <input type="checkbox" name="options" value="${option.id}" ${isChecked ? 'checked' : ''}>
+                  <span>${option.name}</span>
+                </label>
+              `;
+            }).join('')}
           </div>
         </div>
 

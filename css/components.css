@@ -800,6 +800,30 @@
   font-size: var(--text-sm);
 }
 
+/* Option avec quantite */
+.option-with-quantity {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.option-quantity {
+  display: none;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.option-quantity.visible {
+  display: block;
+  opacity: 1;
+}
+
+.option-quantity input {
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--text-sm);
+}
+
 /* Review Card */
 .review-card {
   padding: var(--spacing-5);

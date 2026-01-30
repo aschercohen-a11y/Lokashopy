@@ -23,11 +23,15 @@ const EVENT_TYPES = [
 
 // Options incluses
 const OPTIONS = [
-  { id: 'unlimited-prints', name: 'Impressions illimitees', icon: 'printer' },
+  { id: 'prints', name: 'Impression', icon: 'printer', hasQuantity: true },
   { id: 'props', name: 'Props/accessoires', icon: 'party' },
   { id: 'custom-bg', name: 'Fond personnalise', icon: 'image' },
   { id: 'online-gallery', name: 'Galerie en ligne', icon: 'gallery' },
-  { id: 'gifs', name: 'GIFs/Boomerangs', icon: 'video' },
+  { id: 'gifs', name: 'GIFs', icon: 'video' },
+  { id: 'boomerangs', name: 'Boomerangs', icon: 'video' },
+  { id: 'digital-photos', name: 'Photos envoi numerique', icon: 'image' },
+  { id: 'email', name: 'Mail', icon: 'mail' },
+  { id: 'sms', name: 'SMS', icon: 'phone' },
   { id: 'social-share', name: 'Partage reseaux sociaux', icon: 'share' }
 ];
 
