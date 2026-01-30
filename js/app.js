@@ -85,7 +85,10 @@ const App = {
 
         // Si on vient de charger les donnees et qu'on est sur le dashboard, re-rendre
         if (!wasInitialized && user && this.state.currentPage === 'dashboard') {
-          this.renderDashboardPage(this.state.dashboardTab);
+          // Petit delai pour s'assurer que le DOM est pret
+          setTimeout(() => {
+            this.renderDashboardPage(this.state.dashboardTab);
+          }, 50);
         }
       });
     }
