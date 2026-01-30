@@ -1340,7 +1340,7 @@ const App = {
 
       ${(provider.googleReviewsUrl || provider.trustpilotUrl) ? `
       <div class="external-reviews">
-        <h4>Nos avis clients :</h4>
+        <h4>Nos avis exterieurs :</h4>
         <div class="external-reviews-cards">
           ${provider.googleReviewsUrl ? `
           <a href="${provider.googleReviewsUrl}" target="_blank" rel="noopener" class="external-review-card google-card">
@@ -1387,11 +1387,14 @@ const App = {
       </div>
       ` : ''}
 
-      <div class="reviews-list">
-        ${provider.reviews.length > 0
-          ? provider.reviews.map(review => Components.renderReviewCard(review)).join('')
-          : '<p class="text-center text-gray">Aucun avis pour le moment</p>'
-        }
+      <div class="lokashopy-reviews">
+        <h4>Avis sur Lokashopy :</h4>
+        <div class="reviews-list">
+          ${provider.reviews.length > 0
+            ? provider.reviews.map(review => Components.renderReviewCard(review)).join('')
+            : '<p class="text-center text-gray">Aucun avis sur Lokashopy pour le moment</p>'
+          }
+        </div>
       </div>
     `;
   },

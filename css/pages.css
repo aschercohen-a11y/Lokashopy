@@ -1585,6 +1585,20 @@
   }
 }
 
+/* Lokashopy Reviews Section */
+.lokashopy-reviews {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-6);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.lokashopy-reviews h4 {
+  margin-bottom: var(--spacing-4);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
 /* Tab: Tarifs */
 .pricing-table {
   overflow-x: auto;
