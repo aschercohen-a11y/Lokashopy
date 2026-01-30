@@ -1195,11 +1195,11 @@ const App = {
         <h3>Notre expertise</h3>
         <div class="presentation-stats">
           <div class="presentation-stat">
-            <div class="presentation-stat-value">${provider.experience}</div>
+            <div class="presentation-stat-value">${provider.experience || '-'}</div>
             <div class="presentation-stat-label">Annees d'experience</div>
           </div>
           <div class="presentation-stat">
-            <div class="presentation-stat-value">${provider.eventsPerYear}</div>
+            <div class="presentation-stat-value">${provider.eventsPerYear || '-'}</div>
             <div class="presentation-stat-label">Evenements/an</div>
           </div>
           <div class="presentation-stat">

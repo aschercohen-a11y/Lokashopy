@@ -301,6 +301,8 @@ const ProviderService = {
       reviewCount: 0,
       reviews: [],
       radius: 50,
+      experience: data.experience || null,
+      eventsPerYear: data.events_per_year || null,
       hours: {
         'Lundi': '9h - 18h',
         'Mardi': '9h - 18h',
@@ -327,7 +329,9 @@ const ProviderService = {
         description: data.description,
         logo: data.logo_url,
         verified: data.verified,
-        email: data.email
+        email: data.email,
+        experience: data.experience,
+        eventsPerYear: data.events_per_year
       },
       location: {
         city: data.city,
@@ -363,14 +367,24 @@ const ProviderService = {
   // Mettre a jour le profil
   async updateProfile(uid, profileData) {
     try {
+      const updateData = {
+        name: profileData.name,
+        description: profileData.description,
+        slug: AuthService.generateSlug(profileData.name),
+        updated_at: new Date().toISOString()
+      };
+
+      // Ajouter experience et eventsPerYear si fournis
+      if (profileData.experience !== undefined) {
+        updateData.experience = profileData.experience;
+      }
+      if (profileData.eventsPerYear !== undefined) {
+        updateData.events_per_year = profileData.eventsPerYear;
+      }
+
       const { error } = await supabaseClient
         .from('providers')
-        .update({
-          name: profileData.name,
-          description: profileData.description,
-          slug: AuthService.generateSlug(profileData.name),
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', uid);
 
       if (error) throw error;
