@@ -1233,6 +1233,8 @@
   background: var(--color-gray-50);
   border-radius: var(--radius-xl);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .booth-detail-gallery {
@@ -1240,6 +1242,9 @@
   grid-template-columns: 2fr 1fr;
   gap: var(--spacing-2);
   height: 250px;
+  min-height: 250px;
+  max-height: 250px;
+  flex-shrink: 0;
 }
 
 .booth-detail-gallery img {
@@ -1261,6 +1266,9 @@
 
 .booth-detail-content {
   padding: var(--spacing-5);
+  background: var(--color-gray-50);
+  position: relative;
+  z-index: 1;
 }
 
 .booth-detail-header {
