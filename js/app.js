@@ -1066,10 +1066,12 @@ const App = {
                     ${Components.icons.location}
                     ${provider.location.city} (${provider.location.department})
                   </span>
+                  ${provider.radius ? `
                   <span class="provider-meta-item">
                     ${Components.icons.target}
                     Rayon ${provider.radius} km
                   </span>
+                  ` : ''}
                   <span class="provider-meta-item">
                     ${Utils.generateStars(provider.rating)}
                     <strong>${provider.rating.toFixed(1)}</strong>
