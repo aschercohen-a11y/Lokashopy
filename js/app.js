@@ -1206,14 +1206,18 @@ const App = {
             <div class="presentation-stat-value">${provider.rating.toFixed(1)}</div>
             <div class="presentation-stat-label">Note moyenne</div>
           </div>
+          ${provider.radius ? `
           <div class="presentation-stat">
             <div class="presentation-stat-value">${provider.radius}km</div>
             <div class="presentation-stat-label">Zone d'intervention</div>
           </div>
+          ` : ''}
         </div>
 
+        ${provider.radius ? `
         <h3>Zone d'intervention</h3>
         <p>Nous intervenons dans un rayon de ${provider.radius} km autour de ${provider.location.city} (${provider.location.region}).</p>
+        ` : ''}
 
         ${provider.social ? `
           <h3>Retrouvez-nous</h3>
@@ -2125,7 +2129,8 @@ const App = {
         name: formData.get('name'),
         description: formData.get('description'),
         experience: formData.get('experience') ? parseInt(formData.get('experience')) : null,
-        eventsPerYear: formData.get('eventsPerYear') ? parseInt(formData.get('eventsPerYear')) : null
+        eventsPerYear: formData.get('eventsPerYear') ? parseInt(formData.get('eventsPerYear')) : null,
+        radius: formData.get('radius') ? parseInt(formData.get('radius')) : null
       });
 
       // Update location
@@ -2186,7 +2191,8 @@ const App = {
         name: formData.get('name'),
         description: formData.get('description'),
         experience: formData.get('experience') ? parseInt(formData.get('experience')) : null,
-        eventsPerYear: formData.get('eventsPerYear') ? parseInt(formData.get('eventsPerYear')) : null
+        eventsPerYear: formData.get('eventsPerYear') ? parseInt(formData.get('eventsPerYear')) : null,
+        radius: formData.get('radius') ? parseInt(formData.get('radius')) : null
       });
 
       // Update location

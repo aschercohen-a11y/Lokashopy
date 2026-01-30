@@ -1167,6 +1167,12 @@ const Components = {
               <input type="number" class="form-input" name="eventsPerYear" value="${profile.eventsPerYear || ''}" min="0" placeholder="Ex: 100">
             </div>
           </div>
+
+          <div class="form-group">
+            <label class="form-label">Rayon d'intervention (km)</label>
+            <input type="number" class="form-input" name="radius" value="${profile.radius || ''}" min="0" max="500" placeholder="Ex: 50 (laisser vide pour masquer)">
+            <p class="form-hint">Laisser vide pour ne pas afficher cette information</p>
+          </div>
         </div>
 
         <div class="form-section">

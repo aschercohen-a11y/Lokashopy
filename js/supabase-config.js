@@ -300,7 +300,7 @@ const ProviderService = {
       rating: 5.0,
       reviewCount: 0,
       reviews: [],
-      radius: 50,
+      radius: data.radius || null,
       experience: data.experience || null,
       eventsPerYear: data.events_per_year || null,
       hours: {
@@ -331,7 +331,8 @@ const ProviderService = {
         verified: data.verified,
         email: data.email,
         experience: data.experience,
-        eventsPerYear: data.events_per_year
+        eventsPerYear: data.events_per_year,
+        radius: data.radius
       },
       location: {
         city: data.city,
@@ -374,12 +375,15 @@ const ProviderService = {
         updated_at: new Date().toISOString()
       };
 
-      // Ajouter experience et eventsPerYear si fournis
+      // Ajouter experience, eventsPerYear et radius si fournis
       if (profileData.experience !== undefined) {
         updateData.experience = profileData.experience;
       }
       if (profileData.eventsPerYear !== undefined) {
         updateData.events_per_year = profileData.eventsPerYear;
+      }
+      if (profileData.radius !== undefined) {
+        updateData.radius = profileData.radius;
       }
 
       const { error } = await supabaseClient
