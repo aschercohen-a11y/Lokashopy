@@ -1230,6 +1230,13 @@
   gap: var(--spacing-4);
 }
 
+.booths-subtabs-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-gray-800);
+  margin-bottom: var(--spacing-2);
+}
+
 .booths-subtabs-nav {
   display: flex;
   gap: var(--spacing-2);

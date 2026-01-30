@@ -1247,8 +1247,59 @@ const App = {
       return `<p class="text-center text-gray">Aucun photobooth disponible</p>`;
     }
 
+    // Helper function to render a single booth
+    const renderBoothCard = (booth) => `
+      <div class="booth-detail-card">
+        <div class="booth-detail-gallery">
+          <img src="${booth.images?.[0] || 'https://placehold.co/400x300?text=Photo'}" alt="${booth.name}" data-lightbox="${(booth.images || []).join(',')}" style="cursor: pointer;">
+        </div>
+        <div class="booth-detail-content">
+          <div class="booth-detail-header">
+            <div>
+              <h4>${booth.name}</h4>
+              <span class="tag tag-primary">${DATA.BOOTH_TYPES.find(t => t.id === booth.type)?.name || booth.type}</span>
+            </div>
+            <div class="booth-detail-price">
+              A partir de <strong>${Utils.formatPrice(booth.priceFrom)}</strong>
+            </div>
+          </div>
+          <p class="booth-detail-description">${booth.description || ''}</p>
+          ${booth.specs && booth.specs.length > 0 ? `
+          <div class="booth-specs">
+            ${booth.specs.map(spec => `
+              <span class="booth-spec">
+                ${Components.icons.check}
+                ${spec}
+              </span>
+            `).join('')}
+          </div>
+          ` : ''}
+          ${booth.options && booth.options.length > 0 ? `
+          <div class="booth-options">
+            ${booth.options.map(opt => {
+              const option = DATA.OPTIONS.find(o => o.id === opt);
+              return option ? `
+                <span class="booth-option">
+                  ${Components.icons.checkCircle}
+                  ${option.name}
+                </span>
+              ` : '';
+            }).join('')}
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    // Si un seul photobooth, pas de sous-onglets
+    if (provider.booths.length === 1) {
+      return renderBoothCard(provider.booths[0]);
+    }
+
+    // Plusieurs photobooths : afficher les sous-onglets
     return `
       <div class="booths-subtabs">
+        <h4 class="booths-subtabs-title">Nos choix de photobooth</h4>
         <div class="booths-subtabs-nav">
           ${provider.booths.map((booth, index) => `
             <button class="booth-subtab-btn ${index === 0 ? 'active' : ''}" data-booth-index="${index}">
@@ -1259,46 +1310,7 @@ const App = {
         <div class="booths-subtabs-content">
           ${provider.booths.map((booth, index) => `
             <div class="booth-subtab-panel ${index === 0 ? 'active' : ''}" data-booth-panel="${index}">
-              <div class="booth-detail-card">
-                <div class="booth-detail-gallery">
-                  <img src="${booth.images?.[0] || 'https://placehold.co/400x300?text=Photo'}" alt="${booth.name}" data-lightbox="${(booth.images || []).join(',')}" style="cursor: pointer;">
-                </div>
-                <div class="booth-detail-content">
-                  <div class="booth-detail-header">
-                    <div>
-                      <h4>${booth.name}</h4>
-                      <span class="tag tag-primary">${DATA.BOOTH_TYPES.find(t => t.id === booth.type)?.name || booth.type}</span>
-                    </div>
-                    <div class="booth-detail-price">
-                      A partir de <strong>${Utils.formatPrice(booth.priceFrom)}</strong>
-                    </div>
-                  </div>
-                  <p class="booth-detail-description">${booth.description || ''}</p>
-                  ${booth.specs && booth.specs.length > 0 ? `
-                  <div class="booth-specs">
-                    ${booth.specs.map(spec => `
-                      <span class="booth-spec">
-                        ${Components.icons.check}
-                        ${spec}
-                      </span>
-                    `).join('')}
-                  </div>
-                  ` : ''}
-                  ${booth.options && booth.options.length > 0 ? `
-                  <div class="booth-options">
-                    ${booth.options.map(opt => {
-                      const option = DATA.OPTIONS.find(o => o.id === opt);
-                      return option ? `
-                        <span class="booth-option">
-                          ${Components.icons.checkCircle}
-                          ${option.name}
-                        </span>
-                      ` : '';
-                    }).join('')}
-                  </div>
-                  ` : ''}
-                </div>
-              </div>
+              ${renderBoothCard(booth)}
             </div>
           `).join('')}
         </div>
