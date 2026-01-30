@@ -303,6 +303,8 @@ const ProviderService = {
       radius: data.radius || null,
       experience: data.experience || null,
       eventsPerYear: data.events_per_year || null,
+      googleReviewsUrl: data.google_reviews_url || null,
+      trustpilotUrl: data.trustpilot_url || null,
       hours: {
         'Lundi': '9h - 18h',
         'Mardi': '9h - 18h',
@@ -332,7 +334,9 @@ const ProviderService = {
         email: data.email,
         experience: data.experience,
         eventsPerYear: data.events_per_year,
-        radius: data.radius
+        radius: data.radius,
+        googleReviewsUrl: data.google_reviews_url,
+        trustpilotUrl: data.trustpilot_url
       },
       location: {
         city: data.city,
@@ -384,6 +388,12 @@ const ProviderService = {
       }
       if (profileData.radius !== undefined) {
         updateData.radius = profileData.radius;
+      }
+      if (profileData.googleReviewsUrl !== undefined) {
+        updateData.google_reviews_url = profileData.googleReviewsUrl;
+      }
+      if (profileData.trustpilotUrl !== undefined) {
+        updateData.trustpilot_url = profileData.trustpilotUrl;
       }
 
       const { error } = await supabaseClient

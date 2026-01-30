@@ -1471,6 +1471,67 @@
   gap: var(--spacing-4);
 }
 
+/* External Reviews Links */
+.external-reviews {
+  margin: var(--spacing-6) 0;
+  padding: var(--spacing-4);
+  background: var(--color-gray-50);
+  border-radius: var(--radius-lg);
+}
+
+.external-reviews h4 {
+  margin-bottom: var(--spacing-3);
+  font-size: var(--text-sm);
+  color: var(--color-gray-600);
+}
+
+.external-reviews-links {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.external-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.external-review-btn svg {
+  flex-shrink: 0;
+}
+
+.google-btn {
+  background: #fff;
+  border: 1px solid #dadce0;
+  color: #3c4043;
+}
+
+.google-btn:hover {
+  background: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.google-btn svg path:nth-child(1) { fill: #4285f4; }
+.google-btn svg path:nth-child(2) { fill: #34a853; }
+.google-btn svg path:nth-child(3) { fill: #fbbc05; }
+.google-btn svg path:nth-child(4) { fill: #ea4335; }
+
+.trustpilot-btn {
+  background: #00b67a;
+  color: #fff;
+}
+
+.trustpilot-btn:hover {
+  background: #009567;
+}
+
 /* Tab: Tarifs */
 .pricing-table {
   overflow-x: auto;

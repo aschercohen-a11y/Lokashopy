@@ -1226,6 +1226,23 @@ const Components = {
           </div>
         </div>
 
+        <div class="form-section">
+          <h3>Liens vers vos avis</h3>
+          <p class="form-hint" style="margin-bottom: 16px;">Ajoutez les liens vers vos pages d'avis pour que les clients puissent consulter vos retours</p>
+
+          <div class="form-group">
+            <label class="form-label">Google My Business</label>
+            <input type="url" class="form-input" name="googleReviewsUrl" value="${profile.googleReviewsUrl || ''}" placeholder="https://g.page/votre-entreprise/review">
+            <p class="form-hint">Collez le lien de votre fiche Google</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Trustpilot</label>
+            <input type="url" class="form-input" name="trustpilotUrl" value="${profile.trustpilotUrl || ''}" placeholder="https://fr.trustpilot.com/review/votre-entreprise">
+            <p class="form-hint">Collez le lien de votre page Trustpilot</p>
+          </div>
+        </div>
+
         <div class="form-actions-sticky">
           <button type="submit" class="btn btn-primary" id="save-profile-btn">
             ${this.icons.check} Enregistrer les modifications
