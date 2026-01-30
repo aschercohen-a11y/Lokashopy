@@ -2303,11 +2303,16 @@ const App = {
       };
 
       let result;
+      console.log('Saving booth:', boothData);
+      console.log('User ID:', this.state.currentUser?.id);
+
       if (boothId) {
         result = await ProviderService.updateBooth(this.state.currentUser.id, boothId, boothData);
       } else {
         result = await ProviderService.addBooth(this.state.currentUser.id, boothData);
       }
+
+      console.log('Save result:', result);
 
       if (result.success) {
         this.closeModal('booth-modal');

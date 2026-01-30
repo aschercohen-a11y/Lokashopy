@@ -426,11 +426,16 @@ const ProviderService = {
   // Gestion des photobooths
   async addBooth(uid, boothData) {
     try {
-      const { data: provider } = await supabaseClient
+      console.log('addBooth called with uid:', uid);
+
+      const { data: provider, error: fetchError } = await supabaseClient
         .from('providers')
         .select('booths')
         .eq('id', uid)
         .single();
+
+      console.log('Current provider booths:', provider?.booths);
+      if (fetchError) console.error('Fetch error:', fetchError);
 
       const booths = provider?.booths || [];
       const boothId = 'booth_' + Date.now();
@@ -441,14 +446,22 @@ const ProviderService = {
         createdAt: new Date().toISOString()
       });
 
+      console.log('New booths array:', booths);
+
       const { error } = await supabaseClient
         .from('providers')
         .update({ booths, updated_at: new Date().toISOString() })
         .eq('id', uid);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
+
+      console.log('Booth added successfully');
       return { success: true, boothId };
     } catch (error) {
+      console.error('addBooth error:', error);
       return { success: false, error: error.message };
     }
   },
