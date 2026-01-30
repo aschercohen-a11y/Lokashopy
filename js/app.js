@@ -71,6 +71,7 @@ const App = {
           this.state.userProvider = null;
         }
 
+        const wasInitialized = this.state.authInitialized;
         this.state.authInitialized = true;
 
         // Mettre a jour le header
@@ -80,6 +81,11 @@ const App = {
         if (!user && this.state.currentPage === 'dashboard') {
           this.navigate('/');
           this.openModal('login-modal');
+        }
+
+        // Si on vient de charger les donnees et qu'on est sur le dashboard, re-rendre
+        if (!wasInitialized && user && this.state.currentPage === 'dashboard') {
+          this.renderDashboardPage(this.state.dashboardTab);
         }
       });
     }
