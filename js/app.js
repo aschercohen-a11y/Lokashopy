@@ -1412,6 +1412,9 @@ const App = {
     // Lightbox
     this.setupLightbox();
 
+    // Lazy load images
+    Utils.lazyLoadImages();
+
     // Contact form
     const contactForm = document.getElementById('quick-contact-form');
     if (contactForm) {
@@ -2699,6 +2702,9 @@ const App = {
           if (targetPanel) {
             targetPanel.classList.add('active');
           }
+
+          // Lazy load images in the newly visible tab
+          Utils.lazyLoadImages();
         });
       });
     });
