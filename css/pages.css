@@ -1224,6 +1224,56 @@
 }
 
 /* Tab: Photobooths */
+.booths-subtabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.booths-subtabs-nav {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  padding-bottom: var(--spacing-3);
+  border-bottom: 2px solid var(--color-gray-200);
+}
+
+.booth-subtab-btn {
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-gray-500);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.booth-subtab-btn:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.booth-subtab-btn.active {
+  color: #fff;
+  background: var(--color-primary);
+}
+
+.booths-subtabs-content {
+  min-height: 200px;
+}
+
+.booth-subtab-panel {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.booth-subtab-panel.active {
+  display: block;
+}
+
 .booths-grid {
   display: grid;
   gap: var(--spacing-6);

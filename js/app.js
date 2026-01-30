@@ -1243,53 +1243,65 @@ const App = {
   },
 
   renderBoothsTab(provider) {
+    if (provider.booths.length === 0) {
+      return `<p class="text-center text-gray">Aucun photobooth disponible</p>`;
+    }
+
     return `
-      <div class="booths-grid">
-        ${provider.booths.map(booth => `
-          <div class="booth-detail-card">
-            <div class="booth-detail-gallery">
-              <img src="${booth.images[0]}" alt="${booth.name}" data-lightbox="${booth.images.join(',')}" style="cursor: pointer;">
-              ${booth.images.length > 1 ? `
-                <div class="booth-gallery-side">
-                  ${booth.images.slice(1, 3).map(img => `
-                    <img src="${img}" alt="${booth.name}" data-lightbox="${booth.images.join(',')}" style="cursor: pointer;">
-                  `).join('')}
+      <div class="booths-subtabs">
+        <div class="booths-subtabs-nav">
+          ${provider.booths.map((booth, index) => `
+            <button class="booth-subtab-btn ${index === 0 ? 'active' : ''}" data-booth-index="${index}">
+              ${booth.name}
+            </button>
+          `).join('')}
+        </div>
+        <div class="booths-subtabs-content">
+          ${provider.booths.map((booth, index) => `
+            <div class="booth-subtab-panel ${index === 0 ? 'active' : ''}" data-booth-panel="${index}">
+              <div class="booth-detail-card">
+                <div class="booth-detail-gallery">
+                  <img src="${booth.images?.[0] || 'https://placehold.co/400x300?text=Photo'}" alt="${booth.name}" data-lightbox="${(booth.images || []).join(',')}" style="cursor: pointer;">
                 </div>
-              ` : ''}
+                <div class="booth-detail-content">
+                  <div class="booth-detail-header">
+                    <div>
+                      <h4>${booth.name}</h4>
+                      <span class="tag tag-primary">${DATA.BOOTH_TYPES.find(t => t.id === booth.type)?.name || booth.type}</span>
+                    </div>
+                    <div class="booth-detail-price">
+                      A partir de <strong>${Utils.formatPrice(booth.priceFrom)}</strong>
+                    </div>
+                  </div>
+                  <p class="booth-detail-description">${booth.description || ''}</p>
+                  ${booth.specs && booth.specs.length > 0 ? `
+                  <div class="booth-specs">
+                    ${booth.specs.map(spec => `
+                      <span class="booth-spec">
+                        ${Components.icons.check}
+                        ${spec}
+                      </span>
+                    `).join('')}
+                  </div>
+                  ` : ''}
+                  ${booth.options && booth.options.length > 0 ? `
+                  <div class="booth-options">
+                    ${booth.options.map(opt => {
+                      const option = DATA.OPTIONS.find(o => o.id === opt);
+                      return option ? `
+                        <span class="booth-option">
+                          ${Components.icons.checkCircle}
+                          ${option.name}
+                        </span>
+                      ` : '';
+                    }).join('')}
+                  </div>
+                  ` : ''}
+                </div>
+              </div>
             </div>
-            <div class="booth-detail-content">
-              <div class="booth-detail-header">
-                <div>
-                  <h4>${booth.name}</h4>
-                  <span class="tag tag-primary">${DATA.BOOTH_TYPES.find(t => t.id === booth.type)?.name || booth.type}</span>
-                </div>
-                <div class="booth-detail-price">
-                  A partir de <strong>${Utils.formatPrice(booth.priceFrom)}</strong>
-                </div>
-              </div>
-              <p class="booth-detail-description">${booth.description}</p>
-              <div class="booth-specs">
-                ${booth.specs.map(spec => `
-                  <span class="booth-spec">
-                    ${Components.icons.check}
-                    ${spec}
-                  </span>
-                `).join('')}
-              </div>
-              <div class="booth-options">
-                ${booth.options.map(opt => {
-                  const option = DATA.OPTIONS.find(o => o.id === opt);
-                  return option ? `
-                    <span class="booth-option">
-                      ${Components.icons.checkCircle}
-                      ${option.name}
-                    </span>
-                  ` : '';
-                }).join('')}
-              </div>
-            </div>
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
       </div>
     `;
   },
@@ -2955,6 +2967,43 @@ const App = {
           }
 
           // Lazy load images in the newly visible tab
+          Utils.lazyLoadImages();
+
+          // Setup booth subtabs if they exist
+          this.setupBoothSubtabs();
+        });
+      });
+    });
+
+    // Also setup booth subtabs on initial load
+    this.setupBoothSubtabs();
+  },
+
+  setupBoothSubtabs() {
+    document.querySelectorAll('.booths-subtabs').forEach(container => {
+      const buttons = container.querySelectorAll('.booth-subtab-btn');
+      const panels = container.querySelectorAll('.booth-subtab-panel');
+
+      buttons.forEach(btn => {
+        // Remove existing listeners by cloning
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        newBtn.addEventListener('click', () => {
+          const index = newBtn.dataset.boothIndex;
+
+          // Update buttons
+          container.querySelectorAll('.booth-subtab-btn').forEach(b => b.classList.remove('active'));
+          newBtn.classList.add('active');
+
+          // Update panels
+          panels.forEach(panel => panel.classList.remove('active'));
+          const targetPanel = container.querySelector(`[data-booth-panel="${index}"]`);
+          if (targetPanel) {
+            targetPanel.classList.add('active');
+          }
+
+          // Lazy load images
           Utils.lazyLoadImages();
         });
       });
