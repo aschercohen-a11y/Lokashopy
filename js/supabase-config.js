@@ -304,7 +304,11 @@ const ProviderService = {
       experience: data.experience || null,
       eventsPerYear: data.events_per_year || null,
       googleReviewsUrl: data.google_reviews_url || null,
+      googleRating: data.google_rating || null,
+      googleReviewCount: data.google_review_count || null,
       trustpilotUrl: data.trustpilot_url || null,
+      trustpilotRating: data.trustpilot_rating || null,
+      trustpilotReviewCount: data.trustpilot_review_count || null,
       hours: {
         'Lundi': '9h - 18h',
         'Mardi': '9h - 18h',
@@ -336,7 +340,11 @@ const ProviderService = {
         eventsPerYear: data.events_per_year,
         radius: data.radius,
         googleReviewsUrl: data.google_reviews_url,
-        trustpilotUrl: data.trustpilot_url
+        googleRating: data.google_rating,
+        googleReviewCount: data.google_review_count,
+        trustpilotUrl: data.trustpilot_url,
+        trustpilotRating: data.trustpilot_rating,
+        trustpilotReviewCount: data.trustpilot_review_count
       },
       location: {
         city: data.city,
@@ -392,8 +400,20 @@ const ProviderService = {
       if (profileData.googleReviewsUrl !== undefined) {
         updateData.google_reviews_url = profileData.googleReviewsUrl;
       }
+      if (profileData.googleRating !== undefined) {
+        updateData.google_rating = profileData.googleRating;
+      }
+      if (profileData.googleReviewCount !== undefined) {
+        updateData.google_review_count = profileData.googleReviewCount;
+      }
       if (profileData.trustpilotUrl !== undefined) {
         updateData.trustpilot_url = profileData.trustpilotUrl;
+      }
+      if (profileData.trustpilotRating !== undefined) {
+        updateData.trustpilot_rating = profileData.trustpilotRating;
+      }
+      if (profileData.trustpilotReviewCount !== undefined) {
+        updateData.trustpilot_review_count = profileData.trustpilotReviewCount;
       }
 
       const { error } = await supabaseClient

@@ -1471,65 +1471,118 @@
   gap: var(--spacing-4);
 }
 
-/* External Reviews Links */
+/* External Reviews Cards */
 .external-reviews {
   margin: var(--spacing-6) 0;
-  padding: var(--spacing-4);
-  background: var(--color-gray-50);
-  border-radius: var(--radius-lg);
 }
 
 .external-reviews h4 {
-  margin-bottom: var(--spacing-3);
-  font-size: var(--text-sm);
-  color: var(--color-gray-600);
+  margin-bottom: var(--spacing-4);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-gray-800);
 }
 
-.external-reviews-links {
+.external-reviews-cards {
   display: flex;
-  gap: var(--spacing-3);
+  gap: var(--spacing-4);
   flex-wrap: wrap;
 }
 
-.external-review-btn {
-  display: inline-flex;
-  align-items: center;
+.external-review-card {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-4);
+  padding: var(--spacing-4);
+  background: #fff;
   border-radius: var(--radius-lg);
-  font-weight: 500;
-  font-size: var(--text-sm);
+  border: 1px solid var(--color-gray-200);
   text-decoration: none;
+  min-width: 180px;
   transition: all var(--transition-fast);
 }
 
-.external-review-btn svg {
+.external-review-card:hover {
+  border-color: var(--color-gray-300);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.external-review-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-gray-700);
+}
+
+.external-review-logo svg {
   flex-shrink: 0;
 }
 
-.google-btn {
-  background: #fff;
-  border: 1px solid #dadce0;
-  color: #3c4043;
+.external-review-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
 }
 
-.google-btn:hover {
-  background: #f8f9fa;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.external-review-score {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-gray-900);
 }
 
-.google-btn svg path:nth-child(1) { fill: #4285f4; }
-.google-btn svg path:nth-child(2) { fill: #34a853; }
-.google-btn svg path:nth-child(3) { fill: #fbbc05; }
-.google-btn svg path:nth-child(4) { fill: #ea4335; }
-
-.trustpilot-btn {
-  background: #00b67a;
-  color: #fff;
+.external-review-stars {
+  display: flex;
+  gap: 2px;
 }
 
-.trustpilot-btn:hover {
-  background: #009567;
+.external-review-stars svg {
+  width: 16px;
+  height: 16px;
+}
+
+.external-review-count {
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+}
+
+.external-review-cta {
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.google-card:hover .external-review-cta {
+  color: #4285f4;
+}
+
+.trustpilot-card {
+  border-color: #00b67a;
+}
+
+.trustpilot-card .external-review-logo span {
+  color: #00b67a;
+}
+
+.trustpilot-card:hover {
+  border-color: #00b67a;
+  box-shadow: 0 4px 12px rgba(0, 182, 122, 0.2);
+}
+
+.trustpilot-card .external-review-cta {
+  color: #00b67a;
+}
+
+@media (max-width: 480px) {
+  .external-reviews-cards {
+    flex-direction: column;
+  }
+
+  .external-review-card {
+    min-width: 100%;
+  }
 }
 
 /* Tab: Tarifs */

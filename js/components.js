@@ -1236,10 +1236,32 @@ const Components = {
             <p class="form-hint">Collez le lien de votre fiche Google</p>
           </div>
 
-          <div class="form-group">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Note Google</label>
+              <input type="number" class="form-input" name="googleRating" value="${profile.googleRating || ''}" min="0" max="5" step="0.1" placeholder="Ex: 4.8">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nombre d'avis Google</label>
+              <input type="number" class="form-input" name="googleReviewCount" value="${profile.googleReviewCount || ''}" min="0" placeholder="Ex: 127">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 16px;">
             <label class="form-label">Trustpilot</label>
             <input type="url" class="form-input" name="trustpilotUrl" value="${profile.trustpilotUrl || ''}" placeholder="https://fr.trustpilot.com/review/votre-entreprise">
             <p class="form-hint">Collez le lien de votre page Trustpilot</p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Note Trustpilot</label>
+              <input type="number" class="form-input" name="trustpilotRating" value="${profile.trustpilotRating || ''}" min="0" max="5" step="0.1" placeholder="Ex: 4.5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nombre d'avis Trustpilot</label>
+              <input type="number" class="form-input" name="trustpilotReviewCount" value="${profile.trustpilotReviewCount || ''}" min="0" placeholder="Ex: 89">
+            </div>
           </div>
         </div>
 
