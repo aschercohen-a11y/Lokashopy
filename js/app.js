@@ -972,6 +972,17 @@ const App = {
   // PAGE PRESTATAIRE
   // ----------------------------------------
   async renderProviderPage(slug) {
+    // Afficher un loader pendant le chargement
+    const loaderMain = document.getElementById('main-content');
+    if (loaderMain) {
+      loaderMain.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 400px; flex-direction: column; gap: 16px;">
+          <div class="loader"></div>
+          <p style="color: #6B7280;">Chargement du profil...</p>
+        </div>
+      `;
+    }
+
     // D'abord essayer Supabase, puis fallback sur les donnees demo
     let provider = null;
 
@@ -998,7 +1009,10 @@ const App = {
     }
 
     this.state.currentProvider = provider;
+
+    // Récupérer main après la requête async (le DOM peut avoir changé)
     const main = document.getElementById('main-content');
+    if (!main) return;
 
     const favorites = Utils.storage.get('favorites', []);
     const isFavorite = favorites.includes(provider.id);
