@@ -1335,13 +1335,14 @@
   background: var(--color-primary-light);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
-  color: var(--color-primary);
+  color: var(--color-gray-700);
   white-space: nowrap;
 }
 
 .booth-option svg {
   width: 12px;
   height: 12px;
+  color: var(--color-primary);
 }
 
 /* Tab: Gallery */
