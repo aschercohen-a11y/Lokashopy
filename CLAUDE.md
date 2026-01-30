@@ -247,12 +247,18 @@ ADD COLUMN IF NOT EXISTS trustpilot_review_count int4;
 ## Prochaines etapes possibles
 
 - [ ] Ajouter un domaine personnalise (ex: lokashopy.fr)
-- [ ] Systeme de messagerie entre clients et prestataires
-- [ ] Paiement en ligne pour les reservations
+- [ ] Systeme de messagerie/chat entre clients et prestataires
+- [ ] Paiement en ligne pour les reservations (Stripe)
 - [ ] Systeme de notation/avis par les clients sur Lokashopy
 - [ ] Notifications par email (nouvelles demandes de devis)
 - [ ] Page "Mes favoris" pour les clients
-- [ ] Scraping automatique des notes Google (API payante)
+- [ ] Dashboard admin (moderation, statistiques)
+- [ ] **Application mobile Flutter (iOS + Android)**
+  - Chat temps reel avec Supabase Realtime
+  - Notifications push natives
+  - Publication sur App Store et Play Store
+
+**Voir CHECKLIST.md pour la liste complete des taches**
 
 ---
 
