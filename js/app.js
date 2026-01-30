@@ -1102,7 +1102,7 @@ const App = {
                   { label: 'Presentation', content: this.renderPresentationTab(provider) },
                   { label: 'Photobooths', content: this.renderBoothsTab(provider) },
                   { label: 'Galerie', content: this.renderGalleryTab(provider) },
-                  { label: `Avis (${provider.reviewCount})`, content: this.renderReviewsTab(provider) },
+                  { label: 'Avis', content: this.renderReviewsTab(provider) },
                   { label: 'Tarifs', content: this.renderPricingTab(provider) }
                 ], { id: 'provider-tabs' })}
               </div>
