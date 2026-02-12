@@ -5,8 +5,8 @@
 // IMPORTANT: Remplacez ces valeurs par votre propre configuration Supabase
 // Obtenez-les depuis https://supabase.com > Votre projet > Settings > API
 
-const SUPABASE_URL = 'https://cagygpiweqejbiofknxl.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_xhEh9oudRscxqKTJ5zfgKA_4VF1RXgv';
+const SUPABASE_URL = 'https://supabase-api.swipego.app';
+const SUPABASE_ANON_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3MDkyNDEyMCwiZXhwIjo0OTI2NTk3NzIwLCJyb2xlIjoiYW5vbiJ9.JHskPtaedMotI1_Mdm7hRVBE5gezg0jxXwZkn6GF6as';
 
 // Client Supabase (utilise un nom different pour eviter le conflit avec le SDK)
 let supabaseClient = null;
